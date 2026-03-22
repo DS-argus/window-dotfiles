@@ -1,0 +1,47 @@
+[core]
+	autocrlf = true
+[include]
+	path = ~/.config/git/.gitconfig.local
+[alias]
+  # alias 목록 보기 (`git alias` 자신은 숨김, 설명이 있으면 설명 우선 출력)
+  alias = "!git config --get-regexp '^alias\\.' | awk '{ name=$1; sub(/^alias\\./, \"\", name); if (name == \"alias\") next; $1=\"\"; sub(/^ /, \"\", $0); desc=$0; if ($0 ~ /^!: '\\''/) { sub(/^!: '\\''/, \"\", desc); sub(/'\\'';.*/, \"\", desc); } printf \"%-14s %s\\n\", name, desc }'"
+
+  # 기본 단축
+  ci = commit
+  co = checkout
+  sw = switch
+  re = restore
+  ss = status
+  s = status -s
+
+  # 그래프 형태의 짧은 해시 로그
+  l = "!: '그래프 형태의 짧은 해시 로그'; git log --color --graph --decorate --date=format:'%Y-%m-%d' --abbrev-commit --pretty=format:'%C(red)%h%C(auto)%d %s %C(green)(%cr)%C(bold blue) %an'"
+  # 그래프 형태의 짧은 해시 로그 + 절대 시각
+  ld = "!: '그래프 형태의 짧은 해시 로그 + 절대 시각'; git log --color --graph --decorate --date=format:'%Y-%m-%d %H:%M:%S' --abbrev-commit --pretty=format:'%C(red)%h%C(auto)%d %s %C(green)(%ad)%C(bold blue) %an'"
+  # 그래프 형태의 전체 해시 로그
+  ll = "!: '그래프 형태의 전체 해시 로그'; git log --color --graph --decorate --date=format:'%Y-%m-%d' --pretty=format:'%C(red)%H%C(auto)%d %s %C(green)(%cr)%C(bold blue) %an'"
+  # 그래프 형태의 전체 해시 로그 + 절대 시각
+  lld = "!: '그래프 형태의 전체 해시 로그 + 절대 시각'; git log --color --graph --decorate --date=format:'%Y-%m-%d %H:%M:%S' --pretty=format:'%C(red)%H%C(auto)%d %s %C(green)(%ad)%C(bold blue) %an'"
+  # 최근 25개 커밋만 빠르게 보기
+  lh = "!: '최근 25개 커밋만 빠르게 보기'; git l | head -25"
+  # fzf로 커밋 하나를 골라 해시만 추출
+  commit-select = "!: 'fzf로 커밋 하나를 골라 해시만 추출'; git l | fzf -m --ansi --layout=reverse --preview=\"echo {} | sed 's/^[*| ]*//g' | cut -d' ' -f1 | xargs git show --color=always\" | sed 's/^[*| ]*//g' | cut -d' ' -f1"
+  c-s = "!git commit-select"
+
+  # 현재 브랜치를 백업 브랜치로 하나 더 만든다
+  back = "!: '현재 브랜치를 backup-* 이름으로 하나 더 만든다'; echo created new branch: backup-`git b0`; git branch backup-`git b0`"
+
+  # 최근 커밋 순으로 로컬 브랜치 목록 보기
+  branch-list = "!: '최근 커밋 순으로 로컬 브랜치 목록 보기'; git for-each-ref --sort=-committerdate refs/heads --format='%(HEAD) %(refname:strip=2) | %(committerdate:relative) | %(authorname)' | column -ts'|' | sed 's/^ /./'"
+  b-l = "!git branch-list"
+
+  # fzf로 브랜치를 골라 이름만 추출
+  branch-select = "!: 'fzf로 브랜치를 골라 이름만 추출'; f() { _height=$(stty size | awk '{print $1}'); git branch-list | fzf -m --preview \"git l {2} | head -n $_height\" | awk '{print $2}'; }; f"
+  b-s = "!git branch-select"
+
+  # 브랜치를 선택해서 바로 checkout
+  ch = "!: '브랜치를 선택해서 바로 checkout'; git branch-select | xargs git checkout"
+
+  # 짧은 브랜치 조회 단축
+  b0 = "!git branch --show-current"
+  b1 = "!git rev-parse --abbrev-ref @{-1}"
