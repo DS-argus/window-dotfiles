@@ -72,7 +72,10 @@ Copy-Item "$HOME\.config\git\.gitconfig.local.example" "$HOME\.config\git\.gitco
 gh auth login
 gh extension install dlvhdr/gh-dash
 
-# 10) Open WezTerm
+# 10) Install Yazi packages declared in `yazi/package.toml`
+ya pkg install
+
+# 11) Open WezTerm
 # It will start a fresh PowerShell 7 session with this config loaded
 ```
 
@@ -105,6 +108,7 @@ Open `nvim` once, then run:
 - `WezTerm` starts `pwsh.exe` by default.
 - `PowerShell` exports `STARSHIP_CONFIG` and `YAZI_CONFIG_HOME` from the repo profile.
 - The `y` PowerShell function wraps `yazi` and updates the current working directory when you quit.
+- `Yazi` plugins and flavors are declared in `yazi/package.toml`; run `ya pkg install` once after cloning.
 - `WezTerm` uses `JetBrains Mono` as the main font, `Symbols Nerd Font Mono` for icon fallback, and `D2CodingLigature Nerd Font` for Korean fallback.
 - `git/.gitconfig.local` is intentionally ignored and should contain your personal Git identity.
 - `SymbolicLink` creation may require Windows Developer Mode or an elevated shell.

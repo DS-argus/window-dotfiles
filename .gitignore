@@ -1,7 +1,7 @@
 scoop/
 gh-dash/
 
-yazi/package.toml
 yazi/init.lua
 yazi/plugins/
+yazi/flavors/
 git/.gitconfig.local
