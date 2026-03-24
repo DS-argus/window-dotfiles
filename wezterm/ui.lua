@@ -48,11 +48,12 @@ function M.apply(config, wezterm)
 	-- WezTerm 실행 시 기본 셸은 PowerShell 7로 통일한다.
 	config.default_prog = { "pwsh.exe" }
 
-	-- 영문/한글 폰트를 fallback으로 묶어서 한 파일에서 관리한다.
+	-- 본문은 JetBrains Mono Bold Oblique를 쓰고, 아이콘/한글은 별도 fallback으로 분리한다.
 	config.font_size = 10
 	config.font = wezterm.font_with_fallback({
-		{ family = "JetBrainsMono Nerd Font", weight = "Regular", style = "Oblique" },
-		{ family = "D2CodingLigature Nerd Font", weight = "Regular", style = "Oblique" },
+		{ family = "JetBrains Mono", weight = "Bold", style = "Oblique" },
+		{ family = "Symbols Nerd Font Mono", weight = "Regular", style = "Normal" },
+		{ family = "D2CodingLigature Nerd Font", weight = "Bold", style = "Oblique" },
 	})
 
 	-- 기본 터미널 색과 copy mode/selection 색을 같은 테마 계열로 맞춘다.
@@ -117,7 +118,7 @@ function M.apply(config, wezterm)
 		bottom = 5,
 	}
 	config.window_frame = {
-		font = wezterm.font("JetBrainsMono Nerd Font", { weight = "Bold" }),
+		font = wezterm.font("JetBrains Mono", { weight = "Bold", style = "Oblique" }),
 		font_size = 10,
 	}
 	config.window_decorations = "INTEGRATED_BUTTONS"

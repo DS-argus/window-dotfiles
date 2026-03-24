@@ -37,6 +37,11 @@ scoop install `
   btop bat eza uv lazygit gh neovim csvlens nodejs-lts `
   JetBrainsMono-NF D2Coding-NF
 
+# Optional: install the system-wide symbols font too.
+# WezTerm already bundles `Symbols Nerd Font Mono`, so this is only needed
+# if you want the same symbols font outside WezTerm.
+scoop install NerdFontsSymbolsOnly
+
 # 4) Clone this repo
 git clone <your-repo-url> $HOME\.config
 Set-Location $HOME\.config
@@ -100,7 +105,7 @@ Open `nvim` once, then run:
 - `WezTerm` starts `pwsh.exe` by default.
 - `PowerShell` exports `STARSHIP_CONFIG` and `YAZI_CONFIG_HOME` from the repo profile.
 - The `y` PowerShell function wraps `yazi` and updates the current working directory when you quit.
-- `JetBrainsMono Nerd Font` is the main font. `D2CodingLigature Nerd Font` is used as a Korean fallback.
+- `WezTerm` uses `JetBrains Mono` as the main font, `Symbols Nerd Font Mono` for icon fallback, and `D2CodingLigature Nerd Font` for Korean fallback.
 - `git/.gitconfig.local` is intentionally ignored and should contain your personal Git identity.
 - `SymbolicLink` creation may require Windows Developer Mode or an elevated shell.
 - `Node.js` comes from `scoop install nodejs-lts` in this setup and is required for some Neovim tooling, especially `pyright`.
