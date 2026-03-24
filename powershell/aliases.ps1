@@ -63,6 +63,10 @@ function global:codex {
     & $script:CodexCommand --no-alt-screen @args
 }
 
+function global:lg {
+    lazygit @args
+}
+
 # c 로 clear, e로 exit
 function global:c {
     Clear-Host
