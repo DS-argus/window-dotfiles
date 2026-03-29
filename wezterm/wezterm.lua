@@ -3,6 +3,12 @@
 local wezterm = require("wezterm")
 local config = wezterm.config_builder()
 
+config.unix_domains = {
+	{
+		name = "unix",
+	},
+}
+
 -- 화면/스타일 관련 설정
 require("ui").apply(config, wezterm)
 -- 키맵, workspace, pane 이동 관련 설정

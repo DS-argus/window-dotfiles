@@ -148,8 +148,18 @@ function M.apply(config, wezterm)
 			fg = theme.text
 		end
 
-		local title = tab.tab_title or tab.active_pane.title
-		-- 좌우 separator 공간을 고려해서 제목 길이를 미리 줄인다.
+		local tab_name = tab.tab_title
+		if not tab_name or #tab_name == 0 then
+			tab_name = "tab"
+		end
+
+		local zoom_prefix = ""
+		if tab.active_pane and tab.active_pane.is_zoomed then
+			zoom_prefix = "󰍉 "
+		end
+
+		local title = string.format("%sT%d. %s", zoom_prefix, tab.tab_index + 1, tab_name)
+		-- 좌우 separator와 아이콘 공간을 고려해서 제목 길이를 미리 줄인다.
 		title = wezterm.truncate_right(title, max_width - 4)
 
 		return {
@@ -165,8 +175,8 @@ function M.apply(config, wezterm)
 		}
 	end)
 
-	-- 좌측 status는 입력 모드, 우측 status는 현재 workspace만 보여준다.
-	wezterm.on("update-status", function(window, _)
+	-- 좌측 status는 입력 모드, 우측 status는 현재 domain/workspace를 보여준다.
+	wezterm.on("update-status", function(window, pane)
 		local left_status = {}
 
 		-- leader가 활성화되면 눈에 띄는 주황색 배지를 표시한다.
@@ -186,9 +196,49 @@ function M.apply(config, wezterm)
 		end
 
 		local workspace = window:active_workspace()
-		-- 우측은 workspace만 별도 pill로 강조해서 표시한다.
+		local domain = "unknown"
+		local active_pane = pane
+
+		-- attach/detach 직후에는 전달된 pane 핸들이 아직 안정적이지 않을 수 있어서
+		-- 필요하면 active pane을 다시 조회한다.
+		if not active_pane then
+			local ok_window_pane, window_pane = pcall(function()
+				return window:active_pane()
+			end)
+			if ok_window_pane then
+				active_pane = window_pane
+			end
+		end
+
+		if active_pane then
+			local ok_domain, pane_domain = pcall(function()
+				return active_pane:get_domain_name()
+			end)
+			if ok_domain and pane_domain and #pane_domain > 0 then
+				domain = pane_domain
+			end
+		end
+
+		local domain_bg = palette.surface2
+		if domain == "unix" then
+			domain_bg = palette.green
+		elseif domain == "local" then
+			domain_bg = palette.blue
+		end
+
+		-- 우측은 domain과 workspace를 각각 pill로 강조해서 표시한다.
 		window:set_right_status(wezterm.format({
 			{ Background = { Color = palette.base } },
+			{ Foreground = { Color = domain_bg } },
+			{ Text = "" },
+			{ Background = { Color = domain_bg } },
+			{ Foreground = { Color = palette.crust } },
+			{ Attribute = { Intensity = "Bold" } },
+			{ Text = " 󰒋 " .. domain .. " " },
+			{ Background = { Color = palette.base } },
+			{ Foreground = { Color = domain_bg } },
+			{ Text = "" },
+			{ Text = " " },
 			{ Foreground = { Color = palette.lavender } },
 			{ Text = "" },
 			{ Background = { Color = palette.surface0 } },

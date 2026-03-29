@@ -59,8 +59,14 @@ function M.apply(config, wezterm)
 		-- 3) workspace 관련 (tmux에서 세션개념)
 		--  workspace 이름 변경
 		{ mods = "LEADER", key = "r", action = utils.rename_workspace(wezterm) },
+		--  workspace 이름 입력 후 전환, 없으면 새로 생성
+		{ mods = "LEADER", key = "w", action = utils.switch_workspace(wezterm) },
 		--  workspace 전환 (workspace, 하위 tab 선택가능)
 		{ mods = "LEADER", key = "s", action = utils.select_workspace(wezterm) },
+		--  unix domain에 attach
+		{ mods = "LEADER", key = "u", action = act.AttachDomain("unix") },
+		--  현재 domain에서 detach
+		{ mods = "LEADER", key = "d", action = act.DetachDomain("CurrentPaneDomain") },
 
 		-- 4) 기타
 		--  Copy 모드 진입
