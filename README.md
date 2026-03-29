@@ -19,9 +19,21 @@ The layout is simple:
 - `git`, `lazygit`, `gh`, and `gh-dash`
 - `eza`, `bat`, `btop`, `fzf`, `zoxide`, `ripgrep`, `fd`, `uv`, and `csvlens`
 
+## Easy Setup
+
+If you want the shortest path, let Codex do the setup work for you.
+
+0. Install Codex or Claude.
+1. Open Codex or Claude.
+2. Tell it: `Use this repository as the source of truth and set up my Windows environment based on its README: https://github.com/DS-argus/window-dotfiles. Clone it into ~/.config and apply any required links and config.`
+
 ## Setup
 
 ```powershell
+# 0) Clone this repo first
+git clone <your-repo-url> "$HOME\.config"
+Set-Location "$HOME\.config"
+
 # 1) Install Scoop
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
@@ -32,7 +44,7 @@ scoop bucket add nerd-fonts
 
 # 3) Install terminal, shell, fonts, and CLI tools
 scoop install `
-  git pwsh wezterm starship yazi `
+  pwsh wezterm starship yazi `
   ffmpeg 7zip jq poppler fd ripgrep fzf zoxide resvg imagemagick `
   btop bat eza uv lazygit gh neovim csvlens nodejs-lts `
   JetBrainsMono-NF D2Coding-NF
@@ -42,14 +54,10 @@ scoop install `
 # if you want the same symbols font outside WezTerm.
 scoop install NerdFontsSymbolsOnly
 
-# 4) Clone this repo
-git clone <your-repo-url> $HOME\.config
-Set-Location $HOME\.config
-
-# 5) Point WezTerm at the repo config
+# 4) Point WezTerm at the repo config
 New-Item -ItemType SymbolicLink -Path "$HOME\.wezterm.lua" -Target "$HOME\.config\wezterm\wezterm.lua" -Force
 
-# 6) Create the default PowerShell 7 profile and source the repo profile
+# 5) Create the default PowerShell 7 profile and source the repo profile
 New-Item -ItemType Directory -Force -Path "$HOME\Documents\PowerShell" | Out-Null
 # PowerShell already checks this default profile path; this file just forwards to the repo
 @'
@@ -60,22 +68,22 @@ if (Test-Path -LiteralPath $repoProfile) {
 }
 '@ | Set-Content -Path "$HOME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
 
-# 7) Point Git and Neovim at the repo-managed config
+# 6) Point Git and Neovim at the repo-managed config
 New-Item -ItemType SymbolicLink -Path "$HOME\.gitconfig" -Target "$HOME\.config\git\.gitconfig" -Force
 New-Item -ItemType Junction -Path "$env:LOCALAPPDATA\nvim" -Target "$HOME\.config\nvim" -Force
 
-# 8) Set your Git identity
+# 7) Set your Git identity
 Copy-Item "$HOME\.config\git\.gitconfig.local.example" "$HOME\.config\git\.gitconfig.local"
 # Then edit git/.gitconfig.local with your own name and email
 
-# 9) Install gh-dash
+# 8) Install gh-dash
 gh auth login
 gh extension install dlvhdr/gh-dash
 
-# 10) Install Yazi packages declared in `yazi/package.toml`
+# 9) Install Yazi packages declared in `yazi/package.toml`
 ya pkg install
 
-# 11) Open WezTerm
+# 10) Open WezTerm
 # It will start a fresh PowerShell 7 session with this config loaded
 ```
 
@@ -105,6 +113,7 @@ Open `nvim` once, then run:
 ## Notes
 
 - This setup assumes the repository lives at `$HOME\.config`.
+- This setup assumes `git` is already installed before you start.
 - `WezTerm` starts `pwsh.exe` by default.
 - `PowerShell` exports `STARSHIP_CONFIG` and `YAZI_CONFIG_HOME` from the repo profile.
 - The `y` PowerShell function wraps `yazi` and updates the current working directory when you quit.
