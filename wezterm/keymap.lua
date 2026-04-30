@@ -1,5 +1,97 @@
 local M = {}
 
+local function disable_default_assignment(wezterm, key, mods)
+	return {
+		key = key,
+		mods = mods,
+		action = wezterm.action.DisableDefaultAssignment,
+	}
+end
+
+function M.disable_multiplexing_defaults(config, wezterm)
+	-- WezTerm 기본 키 중 tab/split/pane 이동처럼 외부 multiplexer와 겹치는 항목만 끈다.
+	config.keys = {
+		-- tab 생성/닫기
+		disable_default_assignment(wezterm, "T", "CTRL"),
+		disable_default_assignment(wezterm, "T", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "t", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "t", "SUPER"),
+		disable_default_assignment(wezterm, "W", "CTRL"),
+		disable_default_assignment(wezterm, "W", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "w", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "w", "SUPER"),
+
+		-- tab 이동/번호 선택/순서 변경
+		disable_default_assignment(wezterm, "Tab", "CTRL"),
+		disable_default_assignment(wezterm, "Tab", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "PageUp", "CTRL"),
+		disable_default_assignment(wezterm, "PageUp", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "PageDown", "CTRL"),
+		disable_default_assignment(wezterm, "PageDown", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "[", "SHIFT|SUPER"),
+		disable_default_assignment(wezterm, "]", "SHIFT|SUPER"),
+		disable_default_assignment(wezterm, "{", "SUPER"),
+		disable_default_assignment(wezterm, "{", "SHIFT|SUPER"),
+		disable_default_assignment(wezterm, "}", "SUPER"),
+		disable_default_assignment(wezterm, "}", "SHIFT|SUPER"),
+		disable_default_assignment(wezterm, "!", "CTRL"),
+		disable_default_assignment(wezterm, "!", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "@", "CTRL"),
+		disable_default_assignment(wezterm, "@", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "#", "CTRL"),
+		disable_default_assignment(wezterm, "#", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "$", "CTRL"),
+		disable_default_assignment(wezterm, "$", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "%", "CTRL"),
+		disable_default_assignment(wezterm, "%", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "^", "CTRL"),
+		disable_default_assignment(wezterm, "^", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "&", "CTRL"),
+		disable_default_assignment(wezterm, "&", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "*", "CTRL"),
+		disable_default_assignment(wezterm, "*", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "(", "CTRL"),
+		disable_default_assignment(wezterm, "(", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "1", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "1", "SUPER"),
+		disable_default_assignment(wezterm, "2", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "2", "SUPER"),
+		disable_default_assignment(wezterm, "3", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "3", "SUPER"),
+		disable_default_assignment(wezterm, "4", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "4", "SUPER"),
+		disable_default_assignment(wezterm, "5", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "5", "SUPER"),
+		disable_default_assignment(wezterm, "6", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "6", "SUPER"),
+		disable_default_assignment(wezterm, "7", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "7", "SUPER"),
+		disable_default_assignment(wezterm, "8", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "8", "SUPER"),
+		disable_default_assignment(wezterm, "9", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "9", "SUPER"),
+
+		-- pane 분할/이동/리사이즈/확대
+		disable_default_assignment(wezterm, '"', "ALT|CTRL"),
+		disable_default_assignment(wezterm, '"', "SHIFT|ALT|CTRL"),
+		disable_default_assignment(wezterm, "'", "SHIFT|ALT|CTRL"),
+		disable_default_assignment(wezterm, "%", "ALT|CTRL"),
+		disable_default_assignment(wezterm, "%", "SHIFT|ALT|CTRL"),
+		disable_default_assignment(wezterm, "5", "SHIFT|ALT|CTRL"),
+		disable_default_assignment(wezterm, "LeftArrow", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "RightArrow", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "UpArrow", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "DownArrow", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "LeftArrow", "SHIFT|ALT|CTRL"),
+		disable_default_assignment(wezterm, "RightArrow", "SHIFT|ALT|CTRL"),
+		disable_default_assignment(wezterm, "UpArrow", "SHIFT|ALT|CTRL"),
+		disable_default_assignment(wezterm, "DownArrow", "SHIFT|ALT|CTRL"),
+		disable_default_assignment(wezterm, "Z", "CTRL"),
+		disable_default_assignment(wezterm, "Z", "SHIFT|CTRL"),
+		disable_default_assignment(wezterm, "z", "SHIFT|CTRL"),
+	}
+end
+
 function M.apply(config, wezterm)
 	local act = wezterm.action
 	local utils = require("keymap_utils")
