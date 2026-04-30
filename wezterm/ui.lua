@@ -1,6 +1,9 @@
 local M = {}
 
-function M.apply(config, wezterm)
+function M.apply(config, wezterm, opts)
+	opts = opts or {}
+	local multiplexing_enabled = opts.multiplexing ~= false
+
 	-- Catppuccin Mocha 기반 공용 팔레트.
 	-- tab, status, selection 색을 한 팔레트로 맞추기 위해 여기서 관리한다.
 	local palette = {
@@ -101,14 +104,18 @@ function M.apply(config, wezterm)
 
 	config.enable_scroll_bar = false
 
-	-- 탭바는 fancy 모드 대신 직접 그리는 탭 타이틀을 사용한다.
-	config.enable_tab_bar = true
-	config.use_fancy_tab_bar = false
-	config.show_tab_index_in_tab_bar = false
-	config.switch_to_last_active_tab_when_closing_tab = true
-	config.tab_max_width = 25
-	config.tab_bar_at_bottom = false
-	config.show_new_tab_button_in_tab_bar = true
+	if multiplexing_enabled then
+		-- 탭바는 fancy 모드 대신 직접 그리는 탭 타이틀을 사용한다.
+		config.enable_tab_bar = true
+		config.use_fancy_tab_bar = false
+		config.show_tab_index_in_tab_bar = false
+		config.switch_to_last_active_tab_when_closing_tab = true
+		config.tab_max_width = 25
+		config.tab_bar_at_bottom = false
+		config.show_new_tab_button_in_tab_bar = true
+	else
+		config.enable_tab_bar = false
+	end
 
 	-- 창 여백/프레임/투명도
 	config.window_padding = {
@@ -124,63 +131,65 @@ function M.apply(config, wezterm)
 	config.window_decorations = "INTEGRATED_BUTTONS"
 	config.window_background_opacity = 0.90
 
-	-- 탭을 Catppuccin 톤의 pill 형태로 직접 렌더링한다.
-	-- active / inactive / hover 상태에 따라 배경과 글자색만 바꾼다.
-	wezterm.on("format-tab-title", function(tab, _, _, _, hover, max_width)
-		local theme = {
-			bg = palette.base,
-			inactive = palette.mantle,
-			active = palette.blue,
-			hover = palette.surface1,
-			text = palette.text,
-			inactive_text = palette.overlay1,
-			active_text = palette.crust,
-		}
+	if multiplexing_enabled then
+		-- 탭을 Catppuccin 톤의 pill 형태로 직접 렌더링한다.
+		-- active / inactive / hover 상태에 따라 배경과 글자색만 바꾼다.
+		wezterm.on("format-tab-title", function(tab, _, _, _, hover, max_width)
+			local theme = {
+				bg = palette.base,
+				inactive = palette.mantle,
+				active = palette.blue,
+				hover = palette.surface1,
+				text = palette.text,
+				inactive_text = palette.overlay1,
+				active_text = palette.crust,
+			}
 
-		local bg = theme.inactive
-		local fg = theme.inactive_text
+			local bg = theme.inactive
+			local fg = theme.inactive_text
 
-		if tab.is_active then
-			bg = theme.active
-			fg = theme.active_text
-		elseif hover then
-			bg = theme.hover
-			fg = theme.text
-		end
+			if tab.is_active then
+				bg = theme.active
+				fg = theme.active_text
+			elseif hover then
+				bg = theme.hover
+				fg = theme.text
+			end
 
-		local tab_name = tab.tab_title
-		if not tab_name or #tab_name == 0 then
-			tab_name = "tab"
-		end
+			local tab_name = tab.tab_title
+			if not tab_name or #tab_name == 0 then
+				tab_name = "tab"
+			end
 
-		local zoom_prefix = ""
-		if tab.active_pane and tab.active_pane.is_zoomed then
-			zoom_prefix = "󰍉 "
-		end
+			local zoom_prefix = ""
+			if tab.active_pane and tab.active_pane.is_zoomed then
+				zoom_prefix = "󰍉 "
+			end
 
-		local title = string.format("%sT%d. %s", zoom_prefix, tab.tab_index + 1, tab_name)
-		-- 좌우 separator와 아이콘 공간을 고려해서 제목 길이를 미리 줄인다.
-		title = wezterm.truncate_right(title, max_width - 4)
+			local title = string.format("%sT%d. %s", zoom_prefix, tab.tab_index + 1, tab_name)
+			-- 좌우 separator와 아이콘 공간을 고려해서 제목 길이를 미리 줄인다.
+			title = wezterm.truncate_right(title, max_width - 4)
 
-		return {
-			{ Background = { Color = theme.bg } },
-			{ Foreground = { Color = bg } },
-			{ Text = "" },
-			{ Background = { Color = bg } },
-			{ Foreground = { Color = fg } },
-			{ Text = " 󰆍 " .. title .. " " },
-			{ Background = { Color = theme.bg } },
-			{ Foreground = { Color = bg } },
-			{ Text = "" },
-		}
-	end)
+			return {
+				{ Background = { Color = theme.bg } },
+				{ Foreground = { Color = bg } },
+				{ Text = "" },
+				{ Background = { Color = bg } },
+				{ Foreground = { Color = fg } },
+				{ Text = " 󰆍 " .. title .. " " },
+				{ Background = { Color = theme.bg } },
+				{ Foreground = { Color = bg } },
+				{ Text = "" },
+			}
+		end)
+	end
 
 	-- 좌측 status는 입력 모드, 우측 status는 현재 domain/workspace를 보여준다.
 	wezterm.on("update-status", function(window, pane)
 		local left_status = {}
 
 		-- leader가 활성화되면 눈에 띄는 주황색 배지를 표시한다.
-		if window:leader_is_active() then
+		if multiplexing_enabled and window:leader_is_active() then
 			push_badge(left_status, palette.base, palette.peach, palette.crust, " 󰘳 LEADER ")
 		end
 
@@ -193,6 +202,11 @@ function M.apply(config, wezterm)
 			window:set_left_status(wezterm.format(left_status))
 		else
 			window:set_left_status("")
+		end
+
+		if not multiplexing_enabled then
+			window:set_right_status("")
+			return
 		end
 
 		local workspace = window:active_workspace()
