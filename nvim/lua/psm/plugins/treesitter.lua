@@ -1,10 +1,32 @@
 return {
   "nvim-treesitter/nvim-treesitter",
-  event = { "BufReadPre", "BufNewFile" },
+  branch = "master",
+  lazy = false,
+  build = ":TSUpdate",
   dependencies = {
     "windwp/nvim-ts-autotag",
   },
   config = function()
+    local function resolve_executable(candidates)
+      for _, candidate in ipairs(candidates) do
+        if candidate and candidate ~= "" then
+          if vim.uv.fs_stat(candidate) then
+            return candidate
+          end
+
+          local exepath = vim.fn.exepath(candidate)
+          if exepath ~= "" then
+            return exepath
+          end
+        end
+      end
+    end
+
+    local home = vim.env.USERPROFILE or vim.env.HOME or ""
+    local scoop_apps = home ~= "" and vim.fs.joinpath(home, "scoop", "apps") or nil
+    local gcc_path = scoop_apps and vim.fs.joinpath(scoop_apps, "mingw", "current", "bin", "gcc.exe") or nil
+    local clang_path = scoop_apps and vim.fs.joinpath(scoop_apps, "llvm", "current", "bin", "clang.exe") or nil
+
     local languages = {
       "json",
       "yaml",
@@ -24,55 +46,46 @@ return {
       "rust",
     }
 
-    local ok, treesitter = pcall(require, "nvim-treesitter")
+    local ok, treesitter = pcall(require, "nvim-treesitter.configs")
     if not ok then
       return
     end
 
+    local ok_install, install = pcall(require, "nvim-treesitter.install")
+    if not ok_install then
+      return
+    end
+
+    install.compilers = vim.tbl_filter(function(path)
+      return path and path ~= ""
+    end, {
+      resolve_executable({ gcc_path, "gcc" }),
+      resolve_executable({ clang_path, "clang" }),
+      resolve_executable({ "cl" }),
+      resolve_executable({ "zig" }),
+    })
+
+    local has_compiler = #install.compilers > 0
+
+    -- Neovim 0.11에서는 안정적인 구버전 API(branch=master)를 고정해서 사용한다.
+    -- 컴파일러가 없으면 parser 자동 설치를 건너뛰고, Python은 regex 하이라이트를 함께 켠다.
     treesitter.setup({
-      install_dir = vim.fn.stdpath("data") .. "/site",
+      ensure_installed = has_compiler and languages or {},
+      sync_install = false,
+      auto_install = false,
+      highlight = {
+        enable = true,
+        additional_vim_regex_highlighting = { "python" },
+      },
+      indent = {
+        enable = true,
+        disable = { "python" },
+      },
+      autotag = {
+        enable = true,
+      },
     })
 
-    -- 새 nvim-treesitter는 설치 관리만 담당하고, highlight는 Neovim 기본 TS 엔진이 맡는다.
-    -- parser가 비어 있을 때만 설치를 시도하고, CLI가 없으면 조용히 넘긴다.
-    local installed = {}
-    for _, lang in ipairs(treesitter.get_installed("parsers")) do
-      installed[lang] = true
-    end
-
-    local missing = {}
-    for _, lang in ipairs(languages) do
-      if not installed[lang] then
-        table.insert(missing, lang)
-      end
-    end
-
-    local has_compiler = vim.fn.executable("clang") == 1
-      or vim.fn.executable("gcc") == 1
-      or vim.fn.executable("zig") == 1
-      or vim.fn.executable("cl") == 1
-
-    if #missing > 0 and vim.fn.executable("tree-sitter") == 1 and has_compiler then
-      treesitter.install(missing)
-    end
-
-    local group = vim.api.nvim_create_augroup("PsmTreesitter", { clear = true })
-    vim.api.nvim_create_autocmd("FileType", {
-      group = group,
-      callback = function(args)
-        pcall(vim.treesitter.start, args.buf)
-      end,
-    })
-
-    local ok_autotag, autotag = pcall(require, "nvim-ts-autotag")
-    if ok_autotag then
-      autotag.setup({
-        opts = {
-          enable_close = true,
-          enable_rename = true,
-          enable_close_on_slash = false,
-        },
-      })
-    end
+    vim.cmd("syntax enable")
   end,
 }

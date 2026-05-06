@@ -2,6 +2,7 @@
 $env:STARSHIP_CONFIG = Join-Path $HOME '.config\starship\starship.toml'
 $env:YAZI_CONFIG_HOME = Join-Path $HOME '.config\yazi'
 
+
 # starship 프롬프트를 초기화한다.
 try {
     Invoke-Expression (&starship init powershell)

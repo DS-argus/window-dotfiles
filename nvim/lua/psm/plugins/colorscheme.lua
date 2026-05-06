@@ -43,6 +43,8 @@ return {
 				on_highlights = function(highlights)
 					-- 주석이 WezTerm 투명 배경 위에서도 묻히지 않도록 한 단계 더 또렷하게 올린다.
 					highlights.Comment = { fg = "#7A88B5", italic = true }
+					-- Python colorcolumn이 검은 줄처럼 튀지 않도록 같은 계열의 강조색으로 맞춘다.
+					highlights.ColorColumn = { bg = bg_highlight }
 				end,
 			})
 			-- colorscheme은 다른 UI 플러그인보다 먼저 적용되어야 색이 안정적이다.
