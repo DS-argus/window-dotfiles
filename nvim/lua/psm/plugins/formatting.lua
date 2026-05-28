@@ -11,6 +11,7 @@ return {
 				json = { "prettier" },
 				yaml = { "prettier" },
 				markdown = { "prettier" },
+				go = { "goimports", "gofmt" },
 				lua = { "stylua" },
 				python = { "ruff_organize_imports", "ruff_format" },
 			},

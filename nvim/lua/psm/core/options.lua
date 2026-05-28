@@ -1,3 +1,5 @@
+vim.g.netrw_liststyle = 3
+
 -- Python provider는 현재 설정에서 직접 쓰지 않으므로 꺼서 시작 속도를 줄인다.
 vim.g.loaded_python3_provider = 0
 
@@ -27,6 +29,12 @@ opt.cursorline = true
 opt.termguicolors = true
 opt.background = "dark"
 opt.signcolumn = "yes"
+
+-- Treesitter 문법 트리를 기준으로 코드 접기를 계산하되, 파일을 열 때는 모두 펼쳐 둔다.
+opt.foldmethod = "expr"
+opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+opt.foldlevel = 99
+opt.foldlevelstart = 99
 
 -- 상태창/커맨드라인 표시는 모던 UI 플러그인과 겹치지 않도록 단순하게 둔다.
 opt.laststatus = 3
@@ -62,10 +70,12 @@ local autoread_group = vim.api.nvim_create_augroup("PsmAutoread", { clear = true
 
 -- Git checkout, formatter, 외부 스크립트로 파일이 바뀐 경우 안전한 시점에 다시 읽는다.
 vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold", "CursorHoldI", "TermClose", "TermLeave" }, {
-  group = autoread_group,
-  callback = function()
-    if vim.fn.mode() ~= "c" then
-      vim.cmd("checktime")
-    end
-  end,
+	group = autoread_group,
+	callback = function()
+		if vim.fn.mode() == "c" or vim.fn.getcmdwintype() ~= "" then
+			return
+		end
+
+		pcall(vim.cmd, "checktime")
+	end,
 })

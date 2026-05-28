@@ -15,13 +15,16 @@ end
 
 vim.opt.rtp:prepend(lazypath)
 
-require("lazy").setup(require("psm.plugins"), {
+require("lazy").setup({
+  { import = "psm.plugins" },
+  { import = "psm.plugins.lsp" },
+}, {
   -- 첫 설치 시 색 테마가 비어 보이지 않도록 기본 테마를 미리 지정한다.
   install = {
     colorscheme = { "tokyonight" },
   },
   checker = {
-    enabled = true,
+    enabled = false,
     notify = false,
   },
   change_detection = {
@@ -29,5 +32,16 @@ require("lazy").setup(require("psm.plugins"), {
   },
   ui = {
     border = "rounded",
+  },
+  performance = {
+    rtp = {
+      disabled_plugins = {
+        "gzip",
+        "tarPlugin",
+        "tohtml",
+        "tutor",
+        "zipPlugin",
+      },
+    },
   },
 })

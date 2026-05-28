@@ -1,46 +1,46 @@
 return {
-	{
-		"MeanderingProgrammer/render-markdown.nvim",
-		cmd = { "RenderMarkdown" },
-		ft = { "markdown" },
-		dependencies = {
-			"nvim-treesitter/nvim-treesitter",
-			"nvim-tree/nvim-web-devicons",
-		},
-		main = "render-markdown",
-		init = function()
-			local group = vim.api.nvim_create_augroup("PsmMarkdownKeymaps", { clear = true })
+  {
+    "MeanderingProgrammer/render-markdown.nvim",
+    cmd = { "RenderMarkdown" },
+    ft = { "markdown" },
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter",
+      "nvim-tree/nvim-web-devicons",
+    },
+    main = "render-markdown",
+    config = function(_, opts)
+      local render_markdown = require("render-markdown")
 
-			vim.api.nvim_create_autocmd("FileType", {
-				group = group,
-				pattern = "markdown",
-				callback = function(args)
-					local buf = args.buf
+      render_markdown.setup(opts)
 
-					vim.keymap.set("n", "<leader>mr", "<cmd>RenderMarkdown buf_toggle<CR>", {
-						buffer = buf,
-						desc = "마크다운 렌더링 on/off",
-					})
-				end,
-			})
-		end,
-		config = function(_, opts)
-			require("render-markdown").setup(opts)
-		end,
-		opts = {
-			enabled = false,
-			heading = {
-				sign = false,
-				position = "inline",
-			},
-			code = {
-				enabled = false,
-				sign = false,
-			},
-			file_types = { "markdown" },
-			completions = {
-				lsp = { enabled = true },
-			},
-		},
-	},
+      local group = vim.api.nvim_create_augroup("PsmMarkdownKeymaps", { clear = true })
+
+      local function set_markdown_keymaps(buf)
+        vim.keymap.set("n", "<leader>mr", "<cmd>RenderMarkdown buf_toggle<CR>", {
+          buffer = buf,
+          desc = "마크다운 렌더링 토글",
+        })
+      end
+
+      vim.api.nvim_create_autocmd("FileType", {
+        group = group,
+        pattern = "markdown",
+        callback = function(args)
+          set_markdown_keymaps(args.buf)
+        end,
+      })
+
+      if vim.bo.filetype == "markdown" then
+        set_markdown_keymaps(vim.api.nvim_get_current_buf())
+      end
+    end,
+    opts = {
+      enabled = false,
+      preset = "obsidian",
+      file_types = { "markdown" },
+      completions = {
+        lsp = { enabled = true },
+      },
+    },
+  },
 }

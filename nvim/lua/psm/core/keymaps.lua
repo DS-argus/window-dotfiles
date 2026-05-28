@@ -24,12 +24,6 @@ keymap.set("n", "<leader>sh", "<C-w>s", { desc = "Split window horizontally" })
 keymap.set("n", "<leader>se", "<C-w>=", { desc = "Equalize window size" })
 keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close current window" })
 
--- 방향키 대신 홈로우로 창 이동이 가능하면 터미널/에디터 사이 감각이 맞는다.
-keymap.set("n", "<C-h>", "<C-w>h", { desc = "Move to left window" })
-keymap.set("n", "<C-j>", "<C-w>j", { desc = "Move to lower window" })
-keymap.set("n", "<C-k>", "<C-w>k", { desc = "Move to upper window" })
-keymap.set("n", "<C-l>", "<C-w>l", { desc = "Move to right window" })
-
 -- 탭은 큰 작업 단위를 나눌 때만 쓰도록 최소 키맵만 남긴다.
 keymap.set("n", "<leader>to", "<cmd>tabnew<CR>", { desc = "Open new tab" })
 keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>", { desc = "Close current tab" })
