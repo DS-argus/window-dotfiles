@@ -78,6 +78,8 @@ rules = [
 	{ url = "*.tsv", use = [ "edit", "reveal" ] },
 	# JSON
 	{ url = "*.json", use = [ "edit", "reveal" ] },
+	# TOML
+	{ url = "*.toml", use = [ "edit", "reveal" ] },
 	# HTML
 	{ url = "*.{htm,html}", use = [ "browser", "edit", "reveal" ] },
 	# Text
