@@ -63,6 +63,12 @@ return {
 				---@class snacks.indent.Config
 				---@field enabled? boolean
 				enabled = true,
+				filter = function(buf)
+					return vim.g.snacks_indent ~= false
+						and vim.b[buf].snacks_indent ~= false
+						and vim.bo[buf].buftype == ""
+						and not vim.tbl_contains({ "markdown" }, vim.bo[buf].filetype)
+				end,
 				indent = {
 					priority = 1,
 					char = "┊",
@@ -107,8 +113,16 @@ return {
 			input = { enabled = true },
 			notifier = { enabled = false },
 			picker = { enabled = true },
-			quickfile = { enabled = true },
-			scope = { enabled = true },
+			quickfile = { enabled = false },
+			scope = {
+				enabled = true,
+				filter = function(buf)
+					return vim.bo[buf].buftype == ""
+						and vim.b[buf].snacks_scope ~= false
+						and vim.g.snacks_scope ~= false
+						and not vim.tbl_contains({ "markdown" }, vim.bo[buf].filetype)
+				end,
+			},
 			scroll = { enabled = false },
 			statuscolumn = { enabled = true },
 			words = { enabled = true },

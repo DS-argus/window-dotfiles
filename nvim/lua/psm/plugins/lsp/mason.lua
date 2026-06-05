@@ -1,19 +1,9 @@
 return {
 	"williamboman/mason.nvim",
-	cmd = {
-		"Mason",
-		"MasonInstall",
-		"MasonUninstall",
-		"MasonUninstallAll",
-		"MasonLog",
-		"MasonUpdate",
-		"MasonToolsInstall",
-		"MasonToolsUpdate",
-		"MasonToolsClean",
-	},
 	dependencies = {
 		"williamboman/mason-lspconfig.nvim",
 		"WhoIsSethDaniel/mason-tool-installer.nvim",
+		"neovim/nvim-lspconfig",
 	},
 	config = function()
 		local mason = require("mason")
@@ -37,7 +27,6 @@ return {
 			"lua_ls",
 			"rust_analyzer",
 			"gopls",
-			"goimports",
 		}
 		mason_lspconfig.setup({
 			ensure_installed = servers,
@@ -53,7 +42,7 @@ return {
 				"prettier", -- HTML/CSS/JS formatter
 				"goimports", -- Go import organizer & formatter
 			},
-			run_on_start = false, -- 시작 시 자동 실행 비활성화
+			run_on_start = true,
 		})
 
 		-- 4. LSP 서버 개별 설정은 lspconfig.lua에서 처리 (mason.lua에서는 하지 않음)

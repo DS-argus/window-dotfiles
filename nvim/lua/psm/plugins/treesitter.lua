@@ -1,7 +1,7 @@
 return {
   "nvim-treesitter/nvim-treesitter",
-  branch = "master",
-  event = { "BufReadPre", "BufNewFile" },
+  branch = "main",
+  lazy = false,
   build = ":TSUpdate",
   dependencies = {
     "windwp/nvim-ts-autotag",
@@ -47,17 +47,12 @@ return {
       "rust",
     }
 
-    local ok, treesitter = pcall(require, "nvim-treesitter.configs")
+    local ok, treesitter = pcall(require, "nvim-treesitter")
     if not ok then
       return
     end
 
-    local ok_install, install = pcall(require, "nvim-treesitter.install")
-    if not ok_install then
-      return
-    end
-
-    install.compilers = vim.tbl_filter(function(path)
+    local compilers = vim.tbl_filter(function(path)
       return path and path ~= ""
     end, {
       resolve_executable({ gcc_path, "gcc" }),
@@ -66,25 +61,45 @@ return {
       resolve_executable({ "zig" }),
     })
 
-    local has_compiler = #install.compilers > 0
+    local has_compiler = #compilers > 0
 
-    -- Neovim 0.11에서는 안정적인 구버전 API(branch=master)를 고정해서 사용한다.
-    -- 컴파일러가 없으면 parser 자동 설치를 건너뛰고, Python은 regex 하이라이트를 함께 켠다.
+    if has_compiler then
+      vim.env.CC = compilers[1]
+    end
+
     treesitter.setup({
-      ensure_installed = has_compiler and languages or {},
-      sync_install = false,
-      auto_install = false,
-      highlight = {
-        enable = true,
-        additional_vim_regex_highlighting = { "python" },
-      },
-      indent = {
-        enable = true,
-        disable = { "python" },
-      },
-      autotag = {
-        enable = true,
-      },
+      install_dir = vim.fn.stdpath("data") .. "/site",
+    })
+
+    if has_compiler and vim.fn.executable("tree-sitter") == 1 then
+      local installed = {}
+
+      for _, lang in ipairs(treesitter.get_installed()) do
+        installed[lang] = true
+      end
+
+      local missing = vim.tbl_filter(function(lang)
+        return not installed[lang]
+      end, languages)
+
+      for _, lang in ipairs(missing) do
+        treesitter.install({ lang }):wait(300000)
+      end
+    end
+
+    vim.api.nvim_create_autocmd("FileType", {
+      callback = function(args)
+        local lang = vim.treesitter.language.get_lang(vim.bo[args.buf].filetype)
+
+        if lang and vim.tbl_contains(languages, lang) then
+          pcall(vim.treesitter.start, args.buf, lang)
+        end
+
+        if lang and lang ~= "python" and vim.tbl_contains(languages, lang) then
+          vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end
+      end,
+      desc = "Enable Treesitter for installed languages",
     })
 
     vim.cmd("syntax enable")

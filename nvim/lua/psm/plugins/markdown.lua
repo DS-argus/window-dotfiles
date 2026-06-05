@@ -41,6 +41,22 @@ return {
       completions = {
         lsp = { enabled = true },
       },
+      heading = {
+				sign = false,
+				position = "inline",
+				-- width = "block",
+				border = true,
+			},
+			code = {
+				sign = false,
+				border = "thin",
+			},
+			bullet = {
+				icons = { "", "" },
+			},
+			pipe_table = {
+				preset = "heavy",
+			},
     },
   },
 }
