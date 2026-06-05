@@ -1,7 +1,6 @@
 scoop/
 gh-dash/
 
-yazi/init.lua
 yazi/plugins/
 yazi/flavors/
 git/.gitconfig
