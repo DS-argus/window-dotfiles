@@ -1,0 +1,14 @@
+* text=auto eol=lf
+
+# Keep generated archives and binary assets out of line-ending conversion.
+*.7z binary
+*.avif binary
+*.exe binary
+*.gif binary
+*.ico binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
+*.png binary
+*.webp binary
+*.zip binary
