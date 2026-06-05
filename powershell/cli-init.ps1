@@ -2,6 +2,28 @@
 $env:STARSHIP_CONFIG = Join-Path $HOME '.config\starship\starship.toml'
 $env:YAZI_CONFIG_HOME = Join-Path $HOME '.config\yazi'
 
+# CLI 도구들이 외부 편집기를 요청할 때 Neovim을 사용한다.
+$env:EDITOR = 'nvim'
+$env:VISUAL = 'nvim'
+$env:GIT_EDITOR = 'nvim'
+
+function global:Add-PathEntryIfExists {
+    param([Parameter(Mandatory)] [string] $Path)
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return
+    }
+
+    $entries = @($env:PATH -split ';' | Where-Object { $_ })
+    if ($entries -contains $Path) {
+        return
+    }
+
+    $env:PATH = "$Path;$env:PATH"
+}
+
+Add-PathEntryIfExists (Join-Path $HOME 'scoop\apps\nodejs-lts\current')
+Add-PathEntryIfExists (Join-Path $HOME 'scoop\apps\nodejs-lts\current\bin')
 
 # starship 프롬프트를 초기화한다.
 try {
@@ -39,23 +61,15 @@ try {
     Write-Verbose 'zoxide is not available; using the default cd behavior.'
 }
 
-# Yazi 실행 시 필요한 file.exe 경로를 한 번만 찾아서 환경 변수로 잡는다.
-function global:Initialize-YaziEnvironment {
-    if ($script:YaziEnvironmentInitialized) {
-        return
+# Yazi가 Windows에서 MIME 타입 판별에 사용할 file.exe를 지정한다.
+$fileOneCandidates = @(
+    (Join-Path $HOME 'scoop\apps\git\current\usr\bin\file.exe'),
+    'C:\Program Files\Git\usr\bin\file.exe'
+)
+
+foreach ($candidate in $fileOneCandidates) {
+    if (Test-Path -LiteralPath $candidate) {
+        $env:YAZI_FILE_ONE = $candidate
+        break
     }
-
-    $fileOneCandidates = @(
-        (Join-Path $HOME 'scoop\apps\git\current\usr\bin\file.exe'),
-        'C:\Program Files\Git\usr\bin\file.exe'
-    )
-
-    foreach ($candidate in $fileOneCandidates) {
-        if (Test-Path -LiteralPath $candidate) {
-            $env:YAZI_FILE_ONE = $candidate
-            break
-        }
-    }
-
-    $script:YaziEnvironmentInitialized = $true
 }

@@ -10,12 +10,10 @@ function global:cd {
 
 # yazi, y 등록
 function global:yazi {
-    Initialize-YaziEnvironment
     & yazi.exe @args
 }
 
 function global:y {
-    Initialize-YaziEnvironment
     $tmp = (New-TemporaryFile).FullName
 
     try {
