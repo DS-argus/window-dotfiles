@@ -10,7 +10,7 @@ sort_reverse 	 = false
 sort_dir_first = true
 sort_translit  = false
 sort_fallback  = "alphabetical"
-linemode       = "size"
+linemode       = "size_and_mtime"
 show_hidden    = true
 show_symlink   = true
 scrolloff      = 5
@@ -51,7 +51,7 @@ reveal = [
 ]
 # TODO: 추후 ouch.yazi로 개선
 zip = [
-	{ run = 'pwsh -NoProfile -ExecutionPolicy Bypass -File "C:\Users\박성민\.config\yazi\scripts\compress-folder.ps1" "%s1"', block = true, desc = "Compress to zip", for = "windows" },
+	{ run = 'pwsh -NoProfile -ExecutionPolicy Bypass -File "%USERPROFILE%\.config\yazi\scripts\compress-folder.ps1" "%s1"', block = true, desc = "Compress to zip", for = "windows" },
 ]
 extract = [
 	{ run = 'ya pub extract --list %s',  desc = "Extract here", for = "unix" },

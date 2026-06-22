@@ -43,6 +43,9 @@ return {
 				on_highlights = function(highlights)
 					-- 주석이 WezTerm 투명 배경 위에서도 묻히지 않도록 한 단계 더 또렷하게 올린다.
 					highlights.Comment = { fg = "#7A88B5", italic = true }
+					-- Markdown 강조 구문이 일반 본문색에 묻히지 않도록 색을 분리한다.
+					highlights["@markup.strong"] = { fg = "#FF9E64", bold = true }
+					highlights["@markup.italic"] = { fg = "#BB9AF7", italic = true }
 					-- Python colorcolumn이 검은 줄처럼 튀지 않도록 같은 계열의 강조색으로 맞춘다.
 					highlights.ColorColumn = { bg = bg_highlight }
 				end,

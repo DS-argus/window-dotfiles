@@ -1,615 +1,190 @@
+-- 설정에서 사용할 picker 관련 함수 미리 정의
+local function snacks()
+	return require("snacks")
+end
+
+local file_picker_title = "Files  ⏎ open  ^T tab  ^S/^V split  H/I filter"
+
+local function find_files()
+	snacks().picker.files({
+		hidden = true,
+		ignored = false,
+		title = file_picker_title,
+		win = {
+			input = {
+				keys = {
+					["H"] = { "toggle_hidden", mode = { "n", "i" } },
+					["I"] = { "toggle_ignored", mode = { "n", "i" } },
+				},
+			},
+			list = {
+				keys = {
+					["H"] = "toggle_hidden",
+					["I"] = "toggle_ignored",
+				},
+			},
+		},
+	})
+end
+
+local function find_text()
+	snacks().picker.grep()
+end
+
+local function find_recent()
+	snacks().picker.recent()
+end
+
+local function find_word()
+	snacks().picker.grep_word()
+end
+
+local function find_todos()
+	snacks().picker.grep({
+		search = [[\b(TODO|FIX|FIXME|HACK|WARN|PERF|NOTE|TEST)\b]],
+		regex = true,
+		live = false,
+		hidden = true,
+	})
+end
+
 return {
-	{
-		"nvim-tree/nvim-web-devicons",
-		lazy = true,
-	},
-	{
-		"folke/snacks.nvim",
-		priority = 1000,
-		lazy = false,
-		---@type snacks.Config
-		opts = {
-			bigfile = { enabled = true },
-			dashboard = {
-				enabled = true,
-				sections = {
+	"folke/snacks.nvim",
+	priority = 900,
+	lazy = false,
+	---@type snacks.Config
+	opts = {
+		dashboard = {
+			enabled = true,
+			preset = {
+				keys = {
+					{ icon = " ", key = "e", desc = "New File", action = ":ene | startinsert" },
+					{ icon = "󰱼 ", key = "p", desc = "Find File", action = find_files },
+					{ icon = " ", key = "g", desc = "Find Text", action = find_text },
+					{ icon = " ", key = "r", desc = "Recent Files", action = find_recent },
+					{ icon = " ", key = "q", desc = "Quit", action = ":qa" },
+				},
+			},
+			sections = {
+				{
 					{ section = "header" },
-					{ section = "keys", gap = 1, padding = 1 },
+					{ section = "keys", gap = 1 },
+					{ padding = 0.5, text = { { "", width = 0 } } },
+					{
+						icon = " ",
+						title = "Recent Files",
+						section = "recent_files",
+						indent = 2,
+						padding = 1,
+					},
+					{ icon = " ", title = "Projects", section = "projects", indent = 2, padding = 1 },
 					{ section = "startup" },
 				},
-				preset = {
-					keys = {
-						{
-							icon = " ",
-							key = "e",
-							desc = "새 파일",
-							action = ":ene | startinsert",
-						},
-						{
-							icon = "󰱼 ",
-							key = "f",
-							desc = "파일 찾기",
-							action = function()
-								Snacks.picker.files()
-							end,
-						},
-						{
-							icon = " ",
-							key = "g",
-							desc = "문자열 찾기",
-							action = function()
-								Snacks.picker.grep()
-							end,
-						},
-						{
-							icon = " ",
-							key = "r",
-							desc = "최근 파일",
-							action = function()
-								Snacks.picker.recent()
-							end,
-						},
-						{
-							icon = " ",
-							key = "q",
-							desc = "NVIM 종료",
-							action = ":qa",
-						},
-					},
-				},
 			},
-			explorer = { enabled = false },
-			indent = {
-				---@class snacks.indent.Config
-				---@field enabled? boolean
-				enabled = true,
-				filter = function(buf)
-					return vim.g.snacks_indent ~= false
-						and vim.b[buf].snacks_indent ~= false
-						and vim.bo[buf].buftype == ""
-						and not vim.tbl_contains({ "markdown" }, vim.bo[buf].filetype)
-				end,
-				indent = {
-					priority = 1,
-					char = "┊",
-					hl = "SnacksIndent",
-					only_scope = true,
-				},
-				---@class snacks.indent.animate: snacks.animate.Config
-				---@field enabled? boolean
-				---@field style? "out"|"up_down"|"down"|"up"
-				animate = {
-					enabled = true,
-					style = "out",
-					easing = "linear",
-					duration = {
-						step = 20,
-						total = 500,
-					},
-				},
-				---@class snacks.indent.Scope.Config: snacks.scope.Config
-				scope = {
-					enabled = true, -- enable highlighting the current scope
-					priority = 200,
-					char = "│",
-					underline = false, -- underline the start of the scope
-					only_current = false, -- only show scope in the current window
-					hl = "SnacksIndentScope", ---@type string|string[] hl group for scopes
-				},
-				chunk = {
-					enabled = true,
-					only_current = true,
-					priority = 200,
-					hl = "SnacksIndentChunk", ---@type string|string[] hl group for chunk scopes
-					char = {
-						corner_top = "╭",
-						corner_bottom = "╰",
-						horizontal = "─",
-						vertical = "│",
-						arrow = ">",
-					},
-				},
-			},
-			input = { enabled = true },
-			notifier = { enabled = false },
-			picker = { enabled = true },
-			quickfile = { enabled = false },
-			scope = {
-				enabled = true,
-				filter = function(buf)
-					return vim.bo[buf].buftype == ""
-						and vim.b[buf].snacks_scope ~= false
-						and vim.g.snacks_scope ~= false
-						and not vim.tbl_contains({ "markdown" }, vim.bo[buf].filetype)
-				end,
-			},
-			scroll = { enabled = false },
-			statuscolumn = { enabled = true },
-			words = { enabled = true },
-			terminal = { enabled = true },
-			lazygit = { enabled = true },
-			gitbrowse = { enabled = true },
-			scratch = { enabled = true },
-			zen = { enabled = true },
-			dim = { enabled = true },
 		},
-		init = function()
-			-- VeryLazy 이후에 toggle을 연결하면 which-key와 설명이 자연스럽게 합쳐진다.
-			vim.api.nvim_create_autocmd("User", {
-				pattern = "VeryLazy",
-				callback = function()
-					Snacks.toggle.option("spell", { name = "맞춤법 검사" }):map("<leader>us")
-					Snacks.toggle.option("wrap", { name = "줄바꿈" }):map("<leader>uw")
-					Snacks.toggle.option("relativenumber", { name = "상대 줄번호" }):map("<leader>uL")
-					Snacks.toggle.line_number():map("<leader>ul")
-					Snacks.toggle.diagnostics():map("<leader>ud")
-					Snacks.toggle
-						.option("conceallevel", {
-							off = 0,
-							on = 2,
-							name = "conceal",
-						})
-						:map("<leader>uc")
-					Snacks.toggle.treesitter():map("<leader>uT")
-					Snacks.toggle
-						.option("background", {
-							off = "light",
-							on = "dark",
-							name = "배경 테마",
-						})
-						:map("<leader>ub")
-					Snacks.toggle.indent():map("<leader>ug")
-					Snacks.toggle.dim():map("<leader>uD")
-
-					if vim.lsp.inlay_hint then
-						Snacks.toggle.inlay_hints():map("<leader>uh")
-					end
-				end,
-			})
-		end,
-		keys = {
-			{
-				"<leader><space>",
-				function()
-					Snacks.picker.smart()
-				end,
-				desc = "스마트 picker",
+		indent = {
+			enabled = true,
+			indent = { char = "┊" },
+			animate = {
+				enabled = true,
+				style = "out",
+				easing = "linear",
+				duration = { step = 20, total = 500 },
 			},
-			{
-				"<leader>,",
-				function()
-					Snacks.picker.buffers()
-				end,
-				desc = "버퍼 목록",
+			scope = { enabled = true },
+			chunk = {
+				enabled = true,
+				only_current = true,
+				priority = 200,
+				hl = "SnacksIndentChunk",
+				char = {
+					corner_top = "╭",
+					corner_bottom = "╰",
+					horizontal = "─",
+					vertical = "│",
+					arrow = ">",
+				},
 			},
-			{
-				"<leader>/",
-				function()
-					Snacks.picker.grep()
-				end,
-				desc = "프로젝트 전체 검색",
+		},
+		zen = {
+			enabled = true,
+			toggles = {
+				dim = true,
+				git_signs = false,
+				mini_diff_signs = false,
+				diagnostics = false,
+				inlay_hints = false,
 			},
-			{
-				"<leader>:",
-				function()
-					Snacks.picker.command_history()
-				end,
-				desc = "명령 기록",
+			center = true,
+			show = {
+				statusline = true,
+				tabline = false,
 			},
-			{
-				"<leader>nn",
-				function()
-					Snacks.picker.notifications()
-				end,
-				desc = "알림 목록",
+			win = {
+				style = "zen",
+				width = 100,
+				height = 0,
+				backdrop = {
+					transparent = false,
+					blend = 45,
+				},
 			},
-			{
-				"<leader>fb",
-				function()
-					Snacks.picker.buffers()
-				end,
-				desc = "버퍼 찾기",
+			zoom = {
+				toggles = {},
+				center = false,
+				show = {
+					statusline = true,
+					tabline = true,
+				},
+				win = {
+					backdrop = false,
+					width = 0,
+				},
 			},
-			{
-				"<leader>ff",
-				function()
-					Snacks.picker.files()
-				end,
-				desc = "파일 찾기",
-			},
-			{
-				"<leader>fC",
-				function()
-					Snacks.picker.files({ cwd = vim.fn.stdpath("config") })
-				end,
-				desc = "Neovim 설정 파일",
-			},
-			{
-				"<leader>fc",
-				function()
-					Snacks.picker.grep_word()
-				end,
-				desc = "커서 아래 문자열 찾기",
-			},
-			{
-				"<leader>fg",
-				function()
-					Snacks.picker.git_files()
-				end,
-				desc = "Git 추적 파일",
-			},
-			{
-				"<leader>fh",
-				function()
-					Snacks.picker.help()
-				end,
-				desc = "도움말",
-			},
-			{
-				"<leader>fp",
-				function()
-					Snacks.picker.projects()
-				end,
-				desc = "프로젝트 찾기",
-			},
-			{
-				"<leader>fr",
-				function()
-					Snacks.picker.recent()
-				end,
-				desc = "최근 파일",
-			},
-			{
-				"<leader>fs",
-				function()
-					Snacks.picker.grep()
-				end,
-				desc = "문자열 찾기",
-			},
-			{
-				"<leader>ft",
-				function()
-					Snacks.picker.grep({
-						search = [[\b(TODO|FIX|FIXME|HACK|WARN|PERF|NOTE|TEST)\b]],
-						regex = true,
-						live = false,
-						hidden = true,
-					})
-				end,
-				desc = "TODO 찾기",
-			},
-
-			{
-				'<leader>s"',
-				function()
-					Snacks.picker.registers()
-				end,
-				desc = "레지스터",
-			},
-			{
-				"<leader>s/",
-				function()
-					Snacks.picker.search_history()
-				end,
-				desc = "검색 기록",
-			},
-			{
-				"<leader>sa",
-				function()
-					Snacks.picker.autocmds()
-				end,
-				desc = "자동 명령",
-			},
-			{
-				"<leader>sb",
-				function()
-					Snacks.picker.lines()
-				end,
-				desc = "현재 버퍼 줄 검색",
-			},
-			{
-				"<leader>sB",
-				function()
-					Snacks.picker.grep_buffers()
-				end,
-				desc = "열린 버퍼 검색",
-			},
-			{
-				"<leader>sc",
-				function()
-					Snacks.picker.commands()
-				end,
-				desc = "명령 목록",
-			},
-			{
-				"<leader>sC",
-				function()
-					Snacks.picker.colorschemes()
-				end,
-				desc = "색상 테마",
-			},
-			{
-				"<leader>sd",
-				function()
-					Snacks.picker.diagnostics()
-				end,
-				desc = "전체 진단",
-			},
-			{
-				"<leader>sD",
-				function()
-					Snacks.picker.diagnostics_buffer()
-				end,
-				desc = "현재 버퍼 진단",
-			},
-			{
-				"<leader>sg",
-				function()
-					Snacks.picker.grep()
-				end,
-				desc = "프로젝트 grep",
-			},
-			{
-				"<leader>sH",
-				function()
-					Snacks.picker.highlights()
-				end,
-				desc = "하이라이트 그룹",
-			},
-			{
-				"<leader>si",
-				function()
-					Snacks.picker.icons()
-				end,
-				desc = "아이콘",
-			},
-			{
-				"<leader>sj",
-				function()
-					Snacks.picker.jumps()
-				end,
-				desc = "점프 목록",
-			},
-			{
-				"<leader>sk",
-				function()
-					Snacks.picker.keymaps()
-				end,
-				desc = "키맵 목록",
-			},
-			{
-				"<leader>sl",
-				function()
-					Snacks.picker.loclist()
-				end,
-				desc = "Location list",
-			},
-			{
-				"<leader>sm",
-				function()
-					Snacks.zen.zoom()
-				end,
-				desc = "분할 최대화 토글",
-			},
-			{
-				"<leader>sM",
-				function()
-					Snacks.picker.man()
-				end,
-				desc = "매뉴얼 페이지",
-			},
-			{
-				"<leader>sp",
-				function()
-					Snacks.picker.lazy()
-				end,
-				desc = "플러그인 spec",
-			},
-			{
-				"<leader>sq",
-				function()
-					Snacks.picker.qflist()
-				end,
-				desc = "Quickfix list",
-			},
-			{
-				"<leader>ss",
-				function()
-					Snacks.picker.lsp_symbols()
-				end,
-				desc = "문서 심볼",
-			},
-			{
-				"<leader>sS",
-				function()
-					Snacks.picker.lsp_workspace_symbols()
-				end,
-				desc = "워크스페이스 심볼",
-			},
-			{
-				"<leader>su",
-				function()
-					Snacks.picker.undo()
-				end,
-				desc = "Undo 기록",
-			},
-			{
-				"<leader>sw",
-				function()
-					Snacks.picker.grep_word()
-				end,
-				desc = "커서 단어 검색",
-			},
-
-			{
-				"<leader>gb",
-				function()
-					Snacks.gitbrowse()
-				end,
-				mode = { "n", "v" },
-				desc = "원격 저장소에서 열기",
-			},
-			{
-				"<leader>gf",
-				function()
-					Snacks.lazygit.log_file()
-				end,
-				desc = "현재 파일 Git 로그",
-			},
-			{
-				"<leader>lg",
-				function()
-					Snacks.lazygit()
-				end,
-				desc = "LazyGit",
-			},
-			{
-				"<leader>gl",
-				function()
-					Snacks.picker.git_log()
-				end,
-				desc = "Git 로그",
-			},
-			{
-				"<leader>gL",
-				function()
-					Snacks.picker.git_log_line()
-				end,
-				desc = "현재 줄 Git 로그",
-			},
-			{
-				"<leader>gs",
-				function()
-					Snacks.picker.git_status()
-				end,
-				desc = "Git 상태",
-			},
-			{
-				"<leader>gS",
-				function()
-					Snacks.picker.git_stash()
-				end,
-				desc = "Git stash",
-			},
-
-			{
-				"gd",
-				function()
-					Snacks.picker.lsp_definitions()
-				end,
-				desc = "정의로 이동",
-			},
-			{
-				"gD",
-				function()
-					Snacks.picker.lsp_declarations()
-				end,
-				desc = "선언으로 이동",
-			},
-			{
-				"gR",
-				function()
-					Snacks.picker.lsp_references()
-				end,
-				nowait = true,
-				desc = "참조 찾기",
-			},
-			{
-				"gI",
-				function()
-					Snacks.picker.lsp_implementations()
-				end,
-				desc = "구현 찾기",
-			},
-			{
-				"gy",
-				function()
-					Snacks.picker.lsp_type_definitions()
-				end,
-				desc = "타입 정의 찾기",
-			},
-
-			{
-				"<leader>.",
-				function()
-					Snacks.scratch()
-				end,
-				desc = "스크래치 버퍼",
-			},
-			{
-				"<leader>S",
-				function()
-					Snacks.scratch.select()
-				end,
-				desc = "스크래치 목록",
-			},
-			{
-				"<leader>bd",
-				function()
-					Snacks.bufdelete()
-				end,
-				desc = "현재 버퍼 닫기",
-			},
-			{
-				"<leader>cR",
-				function()
-					Snacks.rename.rename_file()
-				end,
-				desc = "파일 이름 변경",
-			},
-
-			{
-				"<leader>tt",
-				function()
-					Snacks.terminal()
-				end,
-				desc = "내장 터미널",
-			},
-			{
-				"<leader>tz",
-				function()
-					Snacks.zen()
-				end,
-				desc = "Zen 모드",
-			},
-			{
-				"<leader>tZ",
-				function()
-					Snacks.zen.zoom()
-				end,
-				desc = "현재 창 확대",
-			},
-			{
-				"<C-/>",
-				function()
-					Snacks.terminal()
-				end,
-				mode = { "n", "t" },
-				desc = "터미널 토글",
-			},
-			{
-				"<C-_>",
-				function()
-					Snacks.terminal()
-				end,
-				mode = { "n", "t" },
-				desc = "터미널 토글",
-			},
-
-			{
-				"]]",
-				function()
-					Snacks.words.jump(vim.v.count1)
-				end,
-				desc = "다음 참조",
-			},
-			{
-				"[[",
-				function()
-					Snacks.words.jump(-vim.v.count1)
-				end,
-				desc = "이전 참조",
-			},
+		},
+		picker = { enabled = true },
+		explorer = { enabled = false },
+		input = { enabled = true },
+	},
+	keys = {
+		{
+			"<leader>sm",
+			function()
+				snacks().zen.zoom()
+			end,
+			desc = "분할 최대화 토글",
+		},
+		{
+			"<leader>sz",
+			function()
+				snacks().zen()
+			end,
+			desc = "Zen 모드 토글",
+		},
+		{
+			"<leader>ff",
+			find_files,
+			desc = "파일 찾기",
+		},
+		{
+			"<leader>fr",
+			find_recent,
+			desc = "최근 파일 찾기",
+		},
+		{
+			"<leader>fs",
+			find_text,
+			desc = "문자열 찾기",
+		},
+		{
+			"<leader>fc",
+			find_word,
+			desc = "커서 아래 문자열 찾기",
+		},
+		{
+			"<leader>ft",
+			find_todos,
+			desc = "TODO 찾기",
 		},
 	},
 }

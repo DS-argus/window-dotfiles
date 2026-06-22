@@ -229,8 +229,8 @@ keymap = [
 keymap = [
 	{ on = "<C-c>",   run = "close",          desc = "Cancel input" },
 	{ on = "<Enter>", run = "close --submit", desc = "Submit input" },
-	{ on = "<Esc>",   run = "close",          desc = "Cancel input" },
-	{ on = "<C-[>",   run = "close",          desc = "Cancel input" },
+	{ on = "<Esc>",   run = "escape",         desc = "Go back the normal mode, or cancel input" },
+	{ on = "<C-[>",   run = "escape",         desc = "Go back the normal mode, or cancel input" },
 
 	# Mode
 	{ on = "i", run = "insert",                              desc = "Enter insert mode" },
@@ -321,7 +321,7 @@ keymap = [
 keymap = [
 	{ on = "<C-c>",   run = "close",                                      desc = "Cancel completion" },
 	{ on = "<Tab>",   run = "close --submit",                             desc = "Submit the completion" },
-	{ on = "<Enter>", run = [ "close --submit", "close_input --submit" ], desc = "Submit the completion and input" },
+	{ on = "<Enter>", run = [ "close --submit", "input:close --submit" ], desc = "Submit the completion and input" },
 
 	{ on = "<A-k>", run = "arrow -1", desc = "Move cursor up" },
 	{ on = "<A-j>", run = "arrow 1",  desc = "Move cursor down" },

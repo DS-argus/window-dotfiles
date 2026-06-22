@@ -2,8 +2,8 @@
 padding = { x = 5, y = 5}
 dynamic_padding = true
 decorations = "None"      # Full | None
-opacity = 0.9
-startup_mode = "Windowed" # Windowed | Maximized | Fullscreen
+opacity = 1.0
+startup_mode = "Maximized" # Windowed | Maximized | Fullscreen
 title = "Alacritty"
 
 [font]
@@ -16,3 +16,25 @@ style = { shape = "Block", blinking = "On" }
 
 [terminal]
 shell = { program = "pwsh.exe", args = ["-l"]}
+
+[[keyboard.bindings]]
+key = "Space"
+mods = "Control"
+chars = "\u0001"  # for tmux prefix: ctrl+space를 누르면 tmux에서 ctrl+a로 인식
+
+# Windows terminal input can collapse Ctrl+h/Ctrl+j into Backspace/LF.
+# Send them as Alt+h/Alt+j so psmux and Neovim can still use physical Ctrl+hjkl.
+[[keyboard.bindings]]
+key = "H"
+mods = "Control"
+chars = "\u001bh"
+
+[[keyboard.bindings]]
+key = "J"
+mods = "Control"
+chars = "\u001bj"
+
+[[keyboard.bindings]]
+key = "Return"
+mods = "Shift"
+chars = "\u001B\r"

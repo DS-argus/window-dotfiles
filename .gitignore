@@ -1,5 +1,7 @@
 scoop/
 gh-dash/
+.omx/
+.omc/
 
 yazi/plugins/
 yazi/flavors/
