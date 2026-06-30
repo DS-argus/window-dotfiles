@@ -85,18 +85,18 @@ scoop install alacritty wezterm
 
 Reference versions:
 
-| Tool | Version |
-| --- | --- |
-| `git` | `2.54.0` |
-| `pwsh` | `7.6.2` |
-| `neovim` | `0.12.2` |
+| Tool              | Version                                            |
+| ----------------- | -------------------------------------------------- |
+| `git`             | `2.54.0`                                           |
+| `pwsh`            | `7.6.2`                                            |
+| `neovim`          | `0.12.2`                                           |
 | `nvim-treesitter` | `main`, `4916d6592ede8c07973490d9322f187e07dfefac` |
-| `tree-sitter` | `0.26.9` |
-| `mingw` | `16.1.0-rt_v14-rev1` |
-| `yazi` | `26.5.6` |
-| `starship` | `1.25.1` |
-| `psmux` | `3.3.5` |
-| `alacritty` | `0.17.0` |
+| `tree-sitter`     | `0.26.9`                                           |
+| `mingw`           | `16.1.0-rt_v14-rev1`                               |
+| `yazi`            | `26.5.6`                                           |
+| `starship`        | `1.25.1`                                           |
+| `psmux`           | `3.3.5`                                            |
+| `alacritty`       | `0.17.0`                                           |
 
 ## Links
 
@@ -237,16 +237,16 @@ Get-Command nvim
 
 ## Managed Paths
 
-| Repo path | Runtime path | Method |
-| --- | --- | --- |
-| `alacritty/` | `%APPDATA%\alacritty` | `Junction` |
-| `nvim/` | `%LOCALAPPDATA%\nvim` | `Junction` |
-| `git/.gitconfig.local.example` | `git/.gitconfig` then `%USERPROFILE%\.gitconfig` | `local copy, then SymbolicLink` |
-| `powershell/Microsoft.PowerShell_profile.ps1` | `%USERPROFILE%\Documents\PowerShell\Microsoft.PowerShell_profile.ps1` | `profile stub` |
-| `wezterm/wezterm.lua` | `%USERPROFILE%\.wezterm.lua` | `SymbolicLink` |
-| `psmux/psmux.conf` | `%USERPROFILE%\.config\psmux\psmux.conf` | `default path` |
-| `scoop/config.json` | `%USERPROFILE%\.config\scoop\config.json` | `default path` |
-| `gh-dash/config.yml` | `%USERPROFILE%\.config\gh-dash\config.yml` | `default path` |
-| `starship/starship.toml` | `STARSHIP_CONFIG` | `environment variable` |
-| `yazi/` | `YAZI_CONFIG_HOME` | `environment variable` |
-| `obsidian/.obsidian.vimrc` | `<vault>\.obsidian.vimrc` | `manual per vault` |
+| Repo path                                     | Runtime path                                                          | Method                          |
+| --------------------------------------------- | --------------------------------------------------------------------- | ------------------------------- |
+| `alacritty/`                                  | `%APPDATA%\alacritty`                                                 | `Junction`                      |
+| `nvim/`                                       | `%LOCALAPPDATA%\nvim`                                                 | `Junction`                      |
+| `git/.gitconfig.local.example`                | `git/.gitconfig` then `%USERPROFILE%\.gitconfig`                      | `local copy, then SymbolicLink` |
+| `powershell/Microsoft.PowerShell_profile.ps1` | `%USERPROFILE%\Documents\PowerShell\Microsoft.PowerShell_profile.ps1` | `profile stub`                  |
+| `wezterm/wezterm.lua`                         | `%USERPROFILE%\.wezterm.lua`                                          | `SymbolicLink`                  |
+| `psmux/psmux.conf`                            | `%USERPROFILE%\.config\psmux\psmux.conf`                              | `default path`                  |
+| `scoop/config.json`                           | `%USERPROFILE%\.config\scoop\config.json`                             | `default path`                  |
+| `gh-dash/config.yml`                          | `%USERPROFILE%\.config\gh-dash\config.yml`                            | `default path`                  |
+| `starship/starship.toml`                      | `STARSHIP_CONFIG`                                                     | `environment variable`          |
+| `yazi/`                                       | `YAZI_CONFIG_HOME`                                                    | `environment variable`          |
+| `obsidian/.obsidian.vimrc`                    | `<vault>\.obsidian.vimrc`                                             | `manual per vault`              |

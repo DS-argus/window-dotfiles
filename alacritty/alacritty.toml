@@ -15,7 +15,9 @@ offset = { x = 0, y = 1}
 style = { shape = "Block", blinking = "On" }
 
 [terminal]
+# Use one of the following shell settings.
 shell = { program = "pwsh.exe", args = ["-l"]}
+# shell = { program = "bash.exe", args = ["--login", "-i"]}
 
 [[keyboard.bindings]]
 key = "Space"

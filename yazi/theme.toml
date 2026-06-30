@@ -1,7 +1,6 @@
 [flavor]
 # For Yazi 0.4 and above
-light = "tokyo-night"
-dark = "tokyo-night"
+dark = "nord"
 
 [cmp]
 icon_file = "󰈔"

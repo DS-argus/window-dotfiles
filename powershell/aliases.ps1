@@ -15,9 +15,17 @@ function global:yazi {
 
 function global:y {
     $tmp = (New-TemporaryFile).FullName
+    $entries = @($args)
+
+    if ($entries.Count -eq 0) {
+        $currentLocation = $executionContext.SessionState.Path.CurrentLocation
+        if ($currentLocation.Provider.Name -eq 'FileSystem') {
+            $entries = @($currentLocation.ProviderPath)
+        }
+    }
 
     try {
-        & yazi.exe @args --cwd-file="$tmp"
+        & yazi.exe @entries --cwd-file="$tmp"
         $cwd = Get-Content -LiteralPath $tmp -Encoding UTF8 -ErrorAction SilentlyContinue
 
         if ($cwd -and $cwd -ne $PWD.Path -and (Test-Path -LiteralPath $cwd -PathType Container)) {

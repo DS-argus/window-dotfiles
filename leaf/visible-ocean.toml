@@ -1,0 +1,10 @@
+base = "ocean"
+syntax = "base16-ocean.dark"
+
+[markdown]
+code_frame = "#7f91a8"
+code_gutter = "#a3b1c6"
+code_label = "#8bd5ca"
+table_border = "#7f91a8"
+table_separator = "#7f91a8"
+heading_underline = "#7f91a8"
