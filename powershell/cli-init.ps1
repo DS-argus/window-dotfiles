@@ -25,11 +25,12 @@ function global:Add-PathEntryIfExists {
 Add-PathEntryIfExists (Join-Path $HOME 'scoop\apps\nodejs-lts\current')
 Add-PathEntryIfExists (Join-Path $HOME 'scoop\apps\nodejs-lts\current\bin')
 
-# starship 프롬프트를 초기화한다.
-try {
-    Invoke-Expression (&starship init powershell)
-} catch {
-    Write-Verbose 'starship is not available; using the default prompt.'
+if ($env:TERM -ne 'dumb') {
+    try {
+        Invoke-Expression (&starship init powershell)
+    } catch {
+        Write-Verbose 'starship is not available; using the default prompt.'
+    }
 }
 
 # WezTerm이 현재 디렉터리를 추적할 수 있도록 OSC 7 시퀀스를 보내기 -> 새 pane/tab도 현재 폴더에서 열기 위해서
