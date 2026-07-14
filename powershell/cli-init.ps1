@@ -1,3 +1,17 @@
+# Windows Terminal이 Scoop 업데이트 전 PATH를 계속 상속할 수 있으므로,
+# 레지스트리에 저장된 최신 PATH의 누락 항목을 현재 셸에 병합한다.
+$registeredPathEntries = @(
+    [Environment]::GetEnvironmentVariable('Path', 'Machine') -split ';'
+    [Environment]::GetEnvironmentVariable('Path', 'User') -split ';'
+) | Where-Object { $_ } | ForEach-Object {
+    [Environment]::ExpandEnvironmentVariables($_)
+}
+
+$env:PATH = @(
+    @($env:PATH -split ';' | Where-Object { $_ })
+    $registeredPathEntries
+) | Select-Object -Unique | Join-String -Separator ';'
+
 # starship, yazi가 repo 안의 설정 파일을 보도록 경로를 고정한다.
 $env:STARSHIP_CONFIG = Join-Path $HOME '.config\starship\starship.toml'
 $env:YAZI_CONFIG_HOME = Join-Path $HOME '.config\yazi'
@@ -7,52 +21,12 @@ $env:EDITOR = 'nvim'
 $env:VISUAL = 'nvim'
 $env:GIT_EDITOR = 'nvim'
 
-function global:Add-PathEntryIfExists {
-    param([Parameter(Mandatory)] [string] $Path)
-
-    if (-not (Test-Path -LiteralPath $Path)) {
-        return
-    }
-
-    $entries = @($env:PATH -split ';' | Where-Object { $_ })
-    if ($entries -contains $Path) {
-        return
-    }
-
-    $env:PATH = "$Path;$env:PATH"
-}
-
-Add-PathEntryIfExists (Join-Path $HOME 'scoop\apps\nodejs-lts\current')
-Add-PathEntryIfExists (Join-Path $HOME 'scoop\apps\nodejs-lts\current\bin')
-
 if ($env:TERM -ne 'dumb') {
     try {
         Invoke-Expression (&starship init powershell)
     } catch {
         Write-Verbose 'starship is not available; using the default prompt.'
     }
-}
-
-# WezTerm이 현재 디렉터리를 추적할 수 있도록 OSC 7 시퀀스를 보내기 -> 새 pane/tab도 현재 폴더에서 열기 위해서
-function global:Write-WeztermOsc7 {
-    if ($env:TERM_PROGRAM -ne 'WezTerm') {
-        return
-    }
-
-    $currentLocation = $executionContext.SessionState.Path.CurrentLocation
-    if ($currentLocation.Provider.Name -ne 'FileSystem') {
-        return
-    }
-
-    $ansiEscape = [char]27
-    $providerPath = $currentLocation.ProviderPath -replace "\\", "/"
-    $osc7 = "$ansiEscape]7;file://${env:COMPUTERNAME}/${providerPath}$ansiEscape\"
-    $Host.UI.Write($osc7)
-}
-
-# starship이 프롬프트를 그리기 직전에 WezTerm 동기화를 실행
-function global:Invoke-Starship-PreCommand {
-    Write-WeztermOsc7
 }
 
 # zoxide의 z, zi, 디렉터리 추적 훅을 PowerShell에 등록한다.
