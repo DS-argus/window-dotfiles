@@ -2,7 +2,8 @@ scoop/
 gh-dash/
 .omx/
 .omc/
-
+.omo/
+.debug-psmux/
 yazi/plugins/
 yazi/flavors/
 alacritty/themes/
