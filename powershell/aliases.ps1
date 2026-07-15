@@ -8,6 +8,18 @@ function global:cd {
     z @args
 }
 
+function global:.. {
+    cd ..
+}
+
+function global:... {
+    cd ../..
+}
+
+function global:.... {
+    cd ../../..
+}
+
 # Windows Terminal 안에서도 leaf의 터미널 편집기를 현재 화면에서 실행한다.
 $script:LeafCommand = (Get-Command leaf -CommandType ExternalScript,Application | Select-Object -First 1).Source
 function global:leaf {
