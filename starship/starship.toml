@@ -1,5 +1,5 @@
 format = """
-$directory${custom.giturl}$git_branch${custom.git_worktree}$git_status$python$lua$golang$rust$cmd_duration$character"""
+$directory${custom.giturl}$git_branch$git_status$python$lua$golang$rust$cmd_duration$character"""
 
 add_newline = true
 palette = 'nord'
@@ -38,27 +38,6 @@ shell = ['pwsh.exe', '-NoLogo', '-NoProfile', '-Command']
 symbol = ' '
 style = 'fg:polar0 bg:frost2 bold'
 format = '[](fg:frost2)[$symbol$branch]($style)[](fg:frost2) '
-
-[custom.git_worktree]
-description = 'Show indicator when inside a git worktree'
-command = '[Console]::Out.Write("⛓")'
-when = '''
-git rev-parse --is-inside-work-tree *> $null
-if ($LASTEXITCODE -ne 0) { exit 1 }
-
-$common = git rev-parse --path-format=absolute --git-common-dir 2>$null
-if ($LASTEXITCODE -ne 0) { exit 1 }
-
-$dir = git rev-parse --path-format=absolute --git-dir 2>$null
-if ($LASTEXITCODE -ne 0) { exit 1 }
-
-if ($common -ne $dir) { exit 0 }
-exit 1
-'''
-format = '[$output](bold fg:aurora_green) '
-require_repo = true
-ignore_timeout = true
-shell = ['pwsh.exe', '-NoLogo', '-NoProfile', '-Command']
 
 [git_status]
 ahead = '[⇡${count}](fg:frost1)'
