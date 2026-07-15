@@ -1,7 +1,7 @@
 [[plugin.deps]]
 use = "yazi-rs/plugins:full-border"
-rev = "1962818"
-hash = "1e13c39c1ba52ad020e6e26a2dd39ae5"
+rev = "bb758e2"
+hash = "1e3b6c8b03dae81c3672ec9e9700b666"
 
 [[flavor.deps]]
 use = "BennyOe/tokyo-night"
