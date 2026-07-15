@@ -94,8 +94,8 @@ Reference versions:
 | `tree-sitter`     | `0.26.9`                                           |
 | `mingw`           | `16.1.0-rt_v14-rev1`                               |
 | `yazi`            | `26.5.6`                                           |
-| `starship`        | `1.25.1`                                           |
-| `psmux`           | `3.3.5`                                            |
+| `starship`        | `1.26.0`                                           |
+| `psmux`           | `3.3.6`                                            |
 | `alacritty`       | `0.17.0`                                           |
 
 ## Links
@@ -197,9 +197,44 @@ Remove-Item "$HOME\.psmux\plugins\ppm" -Recurse -Force -ErrorAction SilentlyCont
 git clone https://github.com/psmux/psmux-plugins.git "$env:TEMP\psmux-plugins"
 Copy-Item "$env:TEMP\psmux-plugins\ppm" "$HOME\.psmux\plugins\ppm" -Recurse -Force
 Remove-Item "$env:TEMP\psmux-plugins" -Recurse -Force
-
-pwsh -NoProfile -ExecutionPolicy Bypass -File "$HOME\.psmux\plugins\ppm\scripts\install_plugins.ps1"
 ```
+
+Start psmux, then press `Ctrl+a` followed by `Shift+i` (`Prefix + I`) to install the declared plugins. This is PPM's supported bootstrap flow; do not run `install_plugins.ps1` before the first psmux session.
+
+```ps1
+psmux new-session -s setup
+```
+
+After installation, press `Ctrl+a` followed by `r` to reload the config, or exit and create the session again so the installed plugin is loaded.
+
+If `psmux new-session` opens a blank screen, update psmux first. Version 3.3.6 fixes [a Windows environment-block bug](https://github.com/psmux/psmux/issues/167) that could prevent the pane shell from starting on only some machines.
+
+```ps1
+scoop update psmux
+psmux --version  # tmux 3.3.6 or newer
+(Get-Command pwsh -ErrorAction Stop).Source
+
+# Ignore every user config and PowerShell profile for one isolated smoke test.
+psmux -L psmux-smoke -f NUL new-session -s smoke -- pwsh -NoLogo -NoProfile
+
+# Read the concrete shell-spawn error, if psmux recorded one.
+Get-Content "$HOME\.psmux\server-startup.log" -ErrorAction SilentlyContinue
+
+# From a second terminal, see which process owns a live-but-blank pane.
+psmux list-panes -a -F '#{session_name} cmd=#{pane_current_command} dead=#{pane_dead}'
+
+# psmux uses only the first existing config in this order.
+@(
+  "$HOME\.psmux.conf"
+  "$HOME\.psmuxrc"
+  "$HOME\.tmux.conf"
+  "$HOME\.config\psmux\psmux.conf"
+) | Where-Object { Test-Path -LiteralPath $_ }
+```
+
+If the isolated smoke test is still blank on 3.3.6, [issue #450](https://github.com/psmux/psmux/issues/450) matches the blinking-cursor symptom. Its standard-handle race is fixed on master by [`06247bf`](https://github.com/psmux/psmux/commit/06247bfa25e254f1e7657ee8d7323fd3a950fb67); use a newer release containing that commit when available.
+
+If the isolated smoke test works, psmux itself is healthy. The first config printed by the last command, or the normal PowerShell profile, is then the startup blocker.
 
 Install Yazi packages:
 
@@ -240,9 +275,13 @@ Neovim 0.12 uses `nvim-treesitter` `main`; `tree-sitter` and `mingw` are require
 Verify the shell environment:
 
 ```ps1
+$PSVersionTable.PSEdition  # Core
+$PROFILE                   # ...\Documents\PowerShell\Microsoft.PowerShell_profile.ps1
 $env:STARSHIP_CONFIG
+$env:STARSHIP_SHELL        # pwsh
 $env:YAZI_CONFIG_HOME
 $env:YAZI_FILE_ONE
+Get-Command starship
 Get-Command nvim
 ```
 
