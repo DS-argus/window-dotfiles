@@ -44,7 +44,7 @@ theme = "visible-ocean.toml"
 # editor = 'code -g {$path}:{$line}'
 #
 # Priority: --editor flag > LEAF_EDITOR > this setting > nano (notepad on Windows)
-editor = "nvim"
+editor = 'nvim +{$line} +"normal! zz"'
 
 # Maximum content width (number of columns)
 # Limits how wide the rendered content can be.

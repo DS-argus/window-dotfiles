@@ -36,7 +36,7 @@ edit = [
 	{ run = 'nvim %*', block = true, desc = "nvim", for = "windows" },
 ]
 leaf = [
-	{ run = 'leaf %*', block = true, desc = "leaf", for = "windows" },
+	{ run = 'set "WT_SESSION=" && leaf %*', block = true, desc = "leaf", for = "windows" },
 ]
 open = [
 	{ run = 'xdg-open %s1',                 desc = "Open", for = "linux" },

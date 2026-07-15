@@ -1,6 +1,12 @@
 base = "ocean"
 syntax = "base16-ocean.dark"
 
+[ui]
+content_bg = "reset"
+toc_bg = "reset"
+toc_inactive_bg = "reset"
+status_bg = "reset"
+
 [markdown]
 code_frame = "#7f91a8"
 code_gutter = "#a3b1c6"

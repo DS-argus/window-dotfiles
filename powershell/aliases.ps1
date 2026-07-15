@@ -8,6 +8,23 @@ function global:cd {
     z @args
 }
 
+# Windows Terminal 안에서도 leaf의 터미널 편집기를 현재 화면에서 실행한다.
+$script:LeafCommand = (Get-Command leaf -CommandType ExternalScript,Application | Select-Object -First 1).Source
+function global:leaf {
+    $wtSession = $env:WT_SESSION
+
+    try {
+        Remove-Item Env:WT_SESSION -ErrorAction SilentlyContinue
+        & $script:LeafCommand @args
+    } finally {
+        if ($null -eq $wtSession) {
+            Remove-Item Env:WT_SESSION -ErrorAction SilentlyContinue
+        } else {
+            $env:WT_SESSION = $wtSession
+        }
+    }
+}
+
 # yazi, y 등록
 function global:yazi {
     & yazi.exe @args
