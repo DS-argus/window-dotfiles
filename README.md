@@ -160,6 +160,7 @@ if (Test-Path -LiteralPath $repoProfile) {
 
 New-DotfileJunction "$env:LOCALAPPDATA\nvim" "$HOME\.config\nvim"
 New-DotfileJunction "$env:APPDATA\alacritty" "$HOME\.config\alacritty"
+New-DotfileJunction "$env:APPDATA\leaf" "$HOME\.config\leaf"
 
 if (-not (Test-Path -LiteralPath "$HOME\.config\git\.gitconfig")) {
   Copy-Item "$HOME\.config\git\.gitconfig.local.example" "$HOME\.config\git\.gitconfig"
