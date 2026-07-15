@@ -168,10 +168,21 @@ if (-not (Test-Path -LiteralPath "$HOME\.config\git\.gitconfig")) {
 New-DotfileSymlink "$HOME\.gitconfig" "$HOME\.config\git\.gitconfig"
 New-DotfileSymlink "$HOME\.wezterm.lua" "$HOME\.config\wezterm\wezterm.lua"
 
+$windowsTerminalPackage = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe'
+if (Test-Path -LiteralPath $windowsTerminalPackage) {
+  New-DotfileSymlink `
+    (Join-Path $windowsTerminalPackage 'LocalState\settings.json') `
+    "$HOME\.config\windows-terminal\settings.json"
+} else {
+  Write-Warning 'Windows Terminal Stable package was not found; skipped its settings link.'
+}
+
 New-PowerShellProfileStub
 ```
 
 Symbolic links may require Developer Mode or admin PowerShell. The PowerShell profile uses a real stub file instead of a symlink.
+
+The Windows Terminal path above is for the Stable Store/MSIX package. Preview, Canary, and unpackaged distributions use different settings paths. Only `settings.json` is linked; machine-local files such as `state.json` and `elevated-state.json` must not be linked or copied.
 
 ## Post-install
 
@@ -244,6 +255,7 @@ Get-Command nvim
 | `git/.gitconfig.local.example`                | `git/.gitconfig` then `%USERPROFILE%\.gitconfig`                      | `local copy, then SymbolicLink` |
 | `powershell/Microsoft.PowerShell_profile.ps1` | `%USERPROFILE%\Documents\PowerShell\Microsoft.PowerShell_profile.ps1` | `profile stub`                  |
 | `wezterm/wezterm.lua`                         | `%USERPROFILE%\.wezterm.lua`                                          | `SymbolicLink`                  |
+| `windows-terminal/settings.json`              | `%LOCALAPPDATA%\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json` | `SymbolicLink (Stable)`         |
 | `psmux/psmux.conf`                            | `%USERPROFILE%\.config\psmux\psmux.conf`                              | `default path`                  |
 | `scoop/config.json`                           | `%USERPROFILE%\.config\scoop\config.json`                             | `default path`                  |
 | `gh-dash/config.yml`                          | `%USERPROFILE%\.config\gh-dash\config.yml`                            | `default path`                  |

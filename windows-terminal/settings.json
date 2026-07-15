@@ -1,0 +1,154 @@
+{
+    "$help": "https://aka.ms/terminal-documentation",
+    "$schema": "https://aka.ms/terminal-profiles-schema",
+    "actions":
+    [
+        {
+            "command":
+            {
+                "action": "sendInput",
+                "input": "\u0001"
+            },
+            "id": "User.PsmuxPrefix"
+        },
+        {
+            "command":
+            {
+                "action": "sendInput",
+                "input": "\u001bj"
+            },
+            "id": "User.CtrlJAsAltJ"
+        },
+        {
+            "command":
+            {
+                "action": "sendInput",
+                "input": "\u001bh"
+            },
+            "id": "User.CtrlHAsAltH"
+        },
+        {
+            "command":
+            {
+                "action": "sendInput",
+                "input": "\u001b\r"
+            },
+            "id": "User.ShiftEnter"
+        }
+    ],
+    "defaultProfile": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+    "keybindings":
+    [
+        {
+            "id": "User.PsmuxPrefix",
+            "keys": "ctrl+space"
+        },
+        {
+            "id": "unbound",
+            "keys": "ctrl+v"
+        },
+        {
+            "id": "unbound",
+            "keys": "alt+shift+up"
+        },
+        {
+            "id": "User.CtrlHAsAltH",
+            "keys": "ctrl+h"
+        },
+        {
+            "id": "unbound",
+            "keys": "alt+down"
+        },
+        {
+            "id": "User.CtrlJAsAltJ",
+            "keys": "ctrl+j"
+        },
+        {
+            "id": "User.ShiftEnter",
+            "keys": "shift+enter"
+        },
+        {
+            "id": "unbound",
+            "keys": "ctrl+c"
+        },
+        {
+            "id": "unbound",
+            "keys": "alt+left"
+        },
+        {
+            "id": "unbound",
+            "keys": "alt+up"
+        },
+        {
+            "id": "unbound",
+            "keys": "alt+right"
+        },
+        {
+            "id": "unbound",
+            "keys": "alt+shift+d"
+        },
+        {
+            "id": "unbound",
+            "keys": "alt+shift+minus"
+        },
+        {
+            "id": "unbound",
+            "keys": "alt+shift+plus"
+        },
+        {
+            "id": "unbound",
+            "keys": "alt+shift+left"
+        },
+        {
+            "id": "unbound",
+            "keys": "alt+shift+down"
+        },
+        {
+            "id": "unbound",
+            "keys": "alt+shift+right"
+        }
+    ],
+    "newTabMenu":
+    [
+        {
+            "type": "remainingProfiles"
+        }
+    ],
+    "profiles":
+    {
+        "defaults":
+        {
+            "colorScheme": "Dark+",
+            "cursorColor": "#8AE234",
+            "cursorShape": "filledBox",
+            "font":
+            {
+                "face": "JetBrainsMono NF",
+                "size": 14
+            },
+            "opacity": 91,
+            "useAcrylic": false
+        },
+        "list":
+        [
+            {
+                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+                "hidden": false,
+                "name": "PowerShell",
+                "source": "Windows.Terminal.PowershellCore"
+            },
+            {
+                "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+                "hidden": false,
+                "name": "Windows PowerShell"
+            },
+            {
+                "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+                "hidden": false,
+                "name": "Command Prompt"
+            }
+        ]
+    },
+    "schemes": [],
+    "themes": []
+}
