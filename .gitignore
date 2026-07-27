@@ -9,3 +9,5 @@ yazi/flavors/
 alacritty/themes/
 git/.gitconfig
 git/.gitconfig.local
+komorebi/komorebi.bar.json
+yasb/yasb.log

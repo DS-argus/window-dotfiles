@@ -16,6 +16,8 @@ $HOME\.config
 - Shell: `PowerShell 7`
 - File manager: `yazi`
 - Prompt: `starship`
+- Tiling window manager: `komorebi` with `whkd`
+- Status bar: `yasb`
 - CLI tools: `git`, `gh`, `lazygit`, `eza`, `bat`, `btop`, `fzf`, `zoxide`, `ripgrep`, `fd`, `uv`, `csvlens`, `ffmpeg`, `7zip`, `jq`, `poppler`, `resvg`, `imagemagick`, `tree-sitter`, `mingw`, `nodejs-lts`
 
 ## Installation
@@ -81,6 +83,12 @@ Install one or both terminal emulators:
 
 ```ps1
 scoop install alacritty wezterm
+```
+
+Install the tiling window manager, hotkey daemon, and status bar:
+
+```ps1
+scoop install komorebi whkd yasb
 ```
 
 Reference versions:
@@ -236,6 +244,40 @@ Get-Command starship
 Get-Command nvim
 ```
 
+## Window Management
+
+Komorebi, whkd, and YASB keep their configuration under this repository. Set these user environment variables once, then sign out and back in (or restart Windows) before relying on autostarted processes:
+
+```ps1
+$configRoot = "$HOME\.config"
+
+[Environment]::SetEnvironmentVariable('KOMOREBI_CONFIG_HOME', "$configRoot\komorebi", 'User')
+[Environment]::SetEnvironmentVariable('WHKD_CONFIG_HOME', "$configRoot\whkd", 'User')
+[Environment]::SetEnvironmentVariable('YASB_CONFIG_HOME', "$configRoot\yasb", 'User')
+```
+
+For the current PowerShell session, start the components with:
+
+```ps1
+$env:KOMOREBI_CONFIG_HOME = "$HOME\.config\komorebi"
+$env:WHKD_CONFIG_HOME = "$HOME\.config\whkd"
+$env:YASB_CONFIG_HOME = "$HOME\.config\yasb"
+
+komorebic start --whkd --config "$env:KOMOREBI_CONFIG_HOME\komorebi.json"
+yasb
+```
+
+YASB uses the `Komorebi Workspaces` widget and hides empty workspaces. The configured workspace layout is intentionally global across the two displays:
+
+| Display position | Workspace names | Global shortcuts |
+| ---------------- | --------------- | ---------------- |
+| Right            | `1`, `2`, `3`, `4` | `Alt+1` through `Alt+4` |
+| Left             | `5`, `6`, `7`, `8` | `Alt+5` through `Alt+8` |
+
+`Alt+Shift+1` through `Alt+Shift+8` move the focused window to the corresponding globally numbered workspace. `Alt+Shift+Space` cycles layouts, while `Alt+Shift+B` and `Alt+Shift+G` select BSP and Grid. `Alt+O` restarts whkd after editing `whkdrc`.
+
+KakaoTalk is explicitly managed through `komorebi/applications.json`, allowing its main window to tile and move between workspaces.
+
 ## Managed Paths
 
 | Repo path                                     | Runtime path                                                          | Method                          |
@@ -247,6 +289,9 @@ Get-Command nvim
 | `wezterm/wezterm.lua`                         | `%USERPROFILE%\.wezterm.lua`                                          | `SymbolicLink`                  |
 | `windows-terminal/settings.json`              | `%LOCALAPPDATA%\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json` | `SymbolicLink (Stable)`         |
 | `psmux/psmux.conf`                            | `%USERPROFILE%\.config\psmux\psmux.conf`                              | `default path`                  |
+| `komorebi/`                                   | `KOMOREBI_CONFIG_HOME`                                                   | `environment variable`          |
+| `whkd/whkdrc`                                 | `WHKD_CONFIG_HOME\whkdrc`                                               | `environment variable`          |
+| `yasb/`                                       | `YASB_CONFIG_HOME`                                                       | `environment variable`          |
 | `scoop/config.json`                           | `%USERPROFILE%\.config\scoop\config.json`                             | `default path`                  |
 | `gh-dash/config.yml`                          | `%USERPROFILE%\.config\gh-dash\config.yml`                            | `default path`                  |
 | `starship/starship.toml`                      | `STARSHIP_CONFIG`                                                     | `environment variable`          |
