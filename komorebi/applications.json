@@ -1245,8 +1245,8 @@
   "KakaoTalk": {
     "manage": [
       {
-        "kind": "Exe",
-        "id": "KakaoTalk.exe",
+        "kind": "Class",
+        "id": "EVA_Window_Dblclk",
         "matching_strategy": "Equals"
       }
     ]

@@ -5,12 +5,12 @@
 
 /* Root Variables */
 :root {
-    --yasb-bar-bg: rgba(36, 36, 36, 0.85);
-    --yasb-surface-alt: rgb(61, 61, 61);
-    --yasb-bar-border: #303030;
-    --yasb-popup-bg: rgba(36, 36, 36, 0.85);
-    --yasb-dialog-bg: rgb(43, 43, 43);
-    --yasb-dialog-surface: rgb(32, 32, 32);
+    --yasb-bar-bg: rgba(30, 30, 46, 0.92);
+    --yasb-surface-alt: #313244;
+    --yasb-bar-border: #45475a;
+    --yasb-popup-bg: rgba(30, 30, 46, 0.96);
+    --yasb-dialog-bg: #181825;
+    --yasb-dialog-surface: #313244;
     --yasb-white-alpha-03: rgba(255, 255, 255, 0.03);
     --yasb-white-alpha-04: rgba(255, 255, 255, 0.04);
     --yasb-white-alpha-05: rgba(255, 255, 255, 0.05);
@@ -25,14 +25,14 @@
     --yasb-white-alpha-70: rgba(255, 255, 255, 0.7);
     --yasb-white-alpha-80: rgba(255, 255, 255, 0.8);
     --yasb-white-alpha-85: rgba(255, 255, 255, 0.85);
-    --yasb-fg: rgba(255, 255, 255, 0.9);
-    --yasb-fg-muted: rgb(134, 134, 134);
-    --yasb-icon-fg: rgba(255, 255, 255, 0.9);
-    --yasb-tooltip-bg: rgba(31, 31, 31, 0.95);
-    --yasb-tooltip-border: rgb(44, 44, 44);
-    --yasb-accent: #4cc2ff;
-    --yasb-accent-hover: #40ace2;
-    --yasb-accent-fg: #000000;
+    --yasb-fg: #cdd6f4;
+    --yasb-fg-muted: #a6adc8;
+    --yasb-icon-fg: #bac2de;
+    --yasb-tooltip-bg: rgba(24, 24, 37, 0.97);
+    --yasb-tooltip-border: #45475a;
+    --yasb-accent: #89b4fa;
+    --yasb-accent-hover: #b4befe;
+    --yasb-accent-fg: #1e1e2e;
     --icons-font: "Segoe Fluent Icons";
     --icons-font-fallback: "JetBrainsMono NFP", "JetBrainsMono Nerd Font Propo";
     --system-font: "Segoe UI Variable", "Segoe UI";
@@ -40,8 +40,8 @@
 
 /* Global Defaults */
 * {
-    font-size: 12px;
-    font-weight: 400;
+    font-size: 19px;
+    font-weight: 500;
     font-family: var(--system-font);
     color: var(--yasb-fg);
 }
@@ -49,7 +49,7 @@
 /* Bar */
 .yasb-bar {
     background-color: var(--yasb-bar-bg);
-    padding: 0px 12px
+    padding: 0px;
 }
 
 /* Tooltip */
@@ -142,14 +142,14 @@
 
 /* Base Widget Styles */
 .widget {
-    padding: 0px 6px;
-    margin: 4px 0;
-    border-radius: 4px;
+    padding: 0px 10px;
+    margin: 6px 0;
+    border-radius: 6px;
     transition: background-color 0.1s
 }
 
 .widget .icon {
-    font-size: 16px;
+    font-size: 24px;
     font-weight: 400;
     color: var(--yasb-icon-fg);
     font-family: var(--icons-font);
@@ -157,7 +157,7 @@
 
 .widget .label {
     color: var(--yasb-fg);
-    font-weight: 600;
+    font-weight: 700;
     padding-bottom: 2px;
 }
 /* Home Menu */
@@ -183,6 +183,11 @@
 }
 
 /* Clock */
+.clock-widget .label {
+    font-size: 22px;
+    font-weight: 700;
+    padding: 0 8px;
+}
 .clock-widget .icon.alarm {
     color: var(--yasb-accent);
     padding-left: 4px;
@@ -524,8 +529,8 @@
 .komorebi-workspaces .ws-btn {
     color: var(--yasb-fg);
     border: none;
-    margin: 0 2px;
-    padding: 2px 8px;
+    margin: 0 3px;
+    padding: 5px 12px;
     outline: none;
     font-family: var(--system-font);
     font-weight: 600;
@@ -538,6 +543,16 @@
     color: var(--yasb-accent-fg);
     background-color: var(--yasb-accent);
 }
+.komorebi-workspaces .ws-btn .label {
+    color: var(--yasb-fg);
+}
+.komorebi-workspaces .ws-btn .icon {
+    padding: 0 3px;
+}
+.komorebi-workspaces .ws-btn.active .label,
+.komorebi-workspaces .ws-btn.active .icon {
+    color: var(--yasb-accent-fg);
+}
 /* Active Windows Title */
 .active-window-widget .icon {
     padding-right: 4px;
@@ -546,26 +561,56 @@
 
 /* Komorebi Stack: show every title in the focused stack. */
 .komorebi-stack {
-    margin: 4px 0;
+    margin: 6px 0;
 }
 .komorebi-stack .widget-container {
     background-color: var(--yasb-surface-alt);
-    border-radius: 4px;
+    border-radius: 6px;
 }
 .komorebi-stack .window {
     background-color: transparent;
     border: none;
-    margin: 0 2px;
-    padding: 2px 6px;
+    margin: 0 3px;
+    padding: 5px 10px;
 }
 .komorebi-stack .window:hover {
     background-color: var(--yasb-white-alpha-10);
-    border-radius: 3px;
+    border-radius: 5px;
 }
 .komorebi-stack .window.active {
     background-color: var(--yasb-accent);
     border-radius: 3px;
 }
 .komorebi-stack .window.active .label {
+    color: var(--yasb-accent-fg);
+}
+
+/* Komorebi layout selector: left click opens the menu, middle/right cycles layouts. */
+.komorebi-active-layout {
+    margin: 6px 0;
+}
+.komorebi-active-layout .widget-container {
+    background-color: var(--yasb-surface-alt);
+    border-radius: 6px;
+    padding: 0 12px;
+}
+.komorebi-active-layout:hover .widget-container {
+    background-color: var(--yasb-white-alpha-10);
+}
+.komorebi-layout-menu {
+    background-color: var(--yasb-popup-bg);
+    border: 1px solid var(--yasb-bar-border);
+    border-radius: 8px;
+    padding: 4px;
+}
+.komorebi-layout-menu .menu-item {
+    color: var(--yasb-fg);
+    font-weight: 600;
+    border-radius: 4px;
+    padding: 6px 10px;
+}
+.komorebi-layout-menu .menu-item:hover,
+.komorebi-layout-menu .menu-item.active {
+    background-color: var(--yasb-accent);
     color: var(--yasb-accent-fg);
 }

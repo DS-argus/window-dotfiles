@@ -9,17 +9,26 @@
   "border_width": 8,
   "border_offset": -1,
   "theme": {
-    "palette": "Base16",
-    "name": "Ashes",
-    "unfocused_border": "Base03",
-    "bar_accent": "Base0D"
+    "palette": "Catppuccin",
+    "name": "Mocha",
+    "single_border": "Blue",
+    "stack_border": "Green",
+    "monocle_border": "Mauve",
+    "floating_border": "Yellow",
+    "unfocused_border": "Surface0",
+    "unfocused_locked_border": "Red",
+    "bar_accent": "Lavender"
+  },
+  "display_index_preferences": {
+    "0": "0",
+    "1": "509NTWGLY297"
   },
   "monitors": [
     {
       "workspaces": [
         {
           "name": "5",
-          "layout": "BSP"
+          "layout": "VerticalStack"
         },
         {
           "name": "6",
@@ -27,11 +36,11 @@
         },
         {
           "name": "7",
-          "layout": "HorizontalStack"
+          "layout": "VerticalStack"
         },
         {
           "name": "8",
-          "layout": "UltrawideVerticalStack"
+          "layout": "VerticalStack"
         }
       ]
     },
@@ -39,19 +48,19 @@
       "workspaces": [
         {
           "name": "1",
-          "layout": "BSP"
+          "layout": "VerticalStack"
         },
         {
           "name": "2",
-          "layout": "BSP"
+          "layout": "VerticalStack"
         },
         {
           "name": "3",
-          "layout": "BSP"
+          "layout": "VerticalStack"
         },
         {
           "name": "4",
-          "layout": "BSP"
+          "layout": "VerticalStack"
         }
       ]
     }

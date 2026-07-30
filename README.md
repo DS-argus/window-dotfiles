@@ -246,26 +246,43 @@ Get-Command nvim
 
 ## Window Management
 
-Komorebi, whkd, and YASB keep their configuration under this repository. Set these user environment variables once, then sign out and back in (or restart Windows) before relying on autostarted processes:
+Komorebi, whkd, and YASB keep their configuration under this repository. `powershell/cli-init.ps1` automatically sets and synchronizes the required user environment variables whenever the PowerShell profile loads. Open PowerShell once after cloning; then sign out and back in (or restart Windows) before relying on autostarted GUI processes:
 
 ```ps1
-$configRoot = "$HOME\.config"
-
-[Environment]::SetEnvironmentVariable('KOMOREBI_CONFIG_HOME', "$configRoot\komorebi", 'User')
-[Environment]::SetEnvironmentVariable('WHKD_CONFIG_HOME', "$configRoot\whkd", 'User')
-[Environment]::SetEnvironmentVariable('YASB_CONFIG_HOME', "$configRoot\yasb", 'User')
+$env:KOMOREBI_CONFIG_HOME
+$env:WHKD_CONFIG_HOME
+$env:YASB_CONFIG_HOME
 ```
 
-For the current PowerShell session, start the components with:
+For a first manual launch, run:
 
 ```ps1
-$env:KOMOREBI_CONFIG_HOME = "$HOME\.config\komorebi"
-$env:WHKD_CONFIG_HOME = "$HOME\.config\whkd"
-$env:YASB_CONFIG_HOME = "$HOME\.config\yasb"
-
-komorebic start --whkd --config "$env:KOMOREBI_CONFIG_HOME\komorebi.json"
+komorebic start --whkd
 yasb
 ```
+
+Enable automatic startup after confirming both are working. Komorebi's official
+`enable-autostart` command creates a Startup-folder shortcut; add `--whkd` to
+that shortcut so the hotkey daemon starts with Komorebi. YASB's official command
+registers YASB for the current user's Windows logon.
+
+```ps1
+komorebic enable-autostart
+
+$startupDir = [Environment]::GetFolderPath('Startup')
+$shortcutPath = Join-Path $startupDir 'komorebi.lnk'
+$shell = New-Object -ComObject WScript.Shell
+$shortcut = $shell.CreateShortcut($shortcutPath)
+$shortcut.Arguments = 'start --whkd'
+$shortcut.Save()
+
+yasbc enable-autostart
+```
+
+After the next sign-in, Windows starts Komorebi and WHKD through
+`komorebi.lnk`, and starts YASB through its current-user startup registration.
+The three `*_CONFIG_HOME` user environment variables above make each process
+read the configuration from this repository.
 
 YASB uses the `Komorebi Workspaces` widget and hides empty workspaces. The configured workspace layout is intentionally global across the two displays:
 
