@@ -1,13 +1,9 @@
 scoop/
 gh-dash/
 .omx/
-.omc/
-.omo/
+.gjc/
 .debug-psmux/
 yazi/plugins/
 yazi/flavors/
-alacritty/themes/
 git/.gitconfig
 git/.gitconfig.local
-komorebi/komorebi.bar.json
-yasb/yasb.log

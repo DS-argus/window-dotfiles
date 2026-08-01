@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script
+      src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"
+      integrity="sha256-aS0B0wnsaDByLfE16h4MDCP1fQFccysd1YWOcV+gbBo="
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel" data-type="module">
+      import React, { useEffect, useState } from 'https://esm.sh/react@18?dev';
+      import { createRoot } from 'https://esm.sh/react-dom@18/client?dev';
+      import * as zebar from 'https://esm.sh/zebar@3.0';
+
+      const providers = zebar.createProviderGroup({
+        glazewm: { type: 'glazewm' },
+        date: { type: 'date', formatting: 'yyyy-MM-dd HH:mm' },
+        cpu: { type: 'cpu', refreshInterval: 3000 },
+        memory: { type: 'memory', refreshInterval: 3000 },
+        battery: { type: 'battery', refreshInterval: 5000 },
+      });
+
+      function App() {
+        const [output, setOutput] = useState(providers.outputMap);
+
+        useEffect(() => {
+          providers.onOutput(() => setOutput({ ...providers.outputMap }));
+        }, []);
+
+        const glazewm = output.glazewm;
+        const focusedWindow =
+          glazewm?.focusedContainer?.type === 'window'
+            ? glazewm.focusedContainer
+            : null;
+        const currentWorkspaces = [...(glazewm?.currentWorkspaces ?? [])].sort(
+          (left, right) =>
+            Number(left.name) - Number(right.name) ||
+            left.name.localeCompare(right.name),
+        );
+
+        return (
+          <main className="bar">
+            <section className="left">
+              <span className="logo">G</span>
+              <div className="workspaces">
+                {currentWorkspaces.map(workspace => {
+                  const isOccupied = (workspace.children?.length ?? 0) > 0;
+
+                  return (
+                    <button
+                      className={`workspace${isOccupied ? ' occupied' : ''}${workspace.isDisplayed ? ' displayed' : ''}${workspace.hasFocus ? ' focused' : ''}`}
+                      key={workspace.name}
+                      onClick={() => glazewm.runCommand(`focus --workspace ${workspace.name}`)}
+                      title={`Workspace ${workspace.name}${isOccupied ? ' · occupied' : ' · empty'}`}
+                    >
+                      <span className="workspace-label">
+                        {workspace.displayName ?? workspace.name}
+                      </span>
+                      <span className="occupancy" aria-hidden="true"></span>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            <section className="center">
+              <div className="mode-status">
+                {glazewm?.isPaused && <span className="status paused">PAUSED</span>}
+                {glazewm?.bindingModes.map(mode => (
+                  <button
+                    className="status mode"
+                    key={mode.name}
+                    onClick={() => glazewm.runCommand(`wm-disable-binding-mode --name ${mode.name}`)}
+                  >
+                    {mode.displayName ?? mode.name}
+                  </button>
+                ))}
+              </div>
+              {focusedWindow && (
+                <div className="active-window" title={`${focusedWindow.processName} · ${focusedWindow.title}`}>
+                  <span className="active-indicator" aria-hidden="true"></span>
+                  <span className="process-name">{focusedWindow.processName}</span>
+                  <span className="title-separator">·</span>
+                  <span className="window-title">{focusedWindow.title}</span>
+                </div>
+              )}
+            </section>
+
+            <section className="right">
+              {glazewm && (
+                <button
+                  className="direction"
+                  onClick={() => glazewm.runCommand('toggle-tiling-direction')}
+                  title="Toggle tiling direction"
+                >
+                  {glazewm.tilingDirection === 'horizontal' ? 'H' : 'V'}
+                </button>
+              )}
+              {output.cpu && (
+                <span className={output.cpu.usage > 85 ? 'metric warning' : 'metric'}>
+                  CPU {Math.round(output.cpu.usage)}%
+                </span>
+              )}
+              {output.memory && (
+                <span className="metric">MEM {Math.round(output.memory.usage)}%</span>
+              )}
+              {output.battery && (
+                <span className="metric">
+                  {output.battery.isCharging ? 'AC' : 'BAT'} {Math.round(output.battery.chargePercent)}%
+                </span>
+              )}
+              <span className="clock">{output.date?.formatted}</span>
+            </section>
+          </main>
+        );
+      }
+
+      createRoot(document.getElementById('root')).render(<App />);
+    </script>
+  </body>
+</html>

@@ -9,15 +9,15 @@ $HOME\.config
 ## Tools
 
 - Windows package manager: `scoop`
-- Emulator: `alacritty`, optional `wezterm`
+- Emulator: Windows Terminal, optional `wezterm`
 - Multiplexer: `psmux`
 - Editor: `neovim`
 - Notes editor: `obsidian` with Vim mode
 - Shell: `PowerShell 7`
 - File manager: `yazi`
 - Prompt: `starship`
-- Tiling window manager: `komorebi` with `whkd`
-- Status bar: `yasb`
+- Tiling window manager: `GlazeWM`
+- Status bar: `Zebar`
 - CLI tools: `git`, `gh`, `lazygit`, `eza`, `bat`, `btop`, `fzf`, `zoxide`, `ripgrep`, `fd`, `uv`, `csvlens`, `ffmpeg`, `7zip`, `jq`, `poppler`, `resvg`, `imagemagick`, `tree-sitter`, `mingw`, `nodejs-lts`
 
 ## Installation
@@ -79,16 +79,16 @@ scoop install `
   JetBrainsMono-NF D2Coding-NF
 ```
 
-Install one or both terminal emulators:
+Optionally install WezTerm:
 
 ```ps1
-scoop install alacritty wezterm
+scoop install wezterm
 ```
 
-Install the tiling window manager, hotkey daemon, and status bar:
+Install the tiling window manager and status bar:
 
 ```ps1
-scoop install komorebi whkd yasb
+scoop install glazewm zebar
 ```
 
 Reference versions:
@@ -104,7 +104,8 @@ Reference versions:
 | `yazi`            | `26.5.6`                                           |
 | `starship`        | `1.26.0`                                           |
 | `psmux`           | `3.3.6`                                            |
-| `alacritty`       | `0.17.0`                                           |
+| `glazewm`        | `3.10.1`                                           |
+| `zebar`          | `3.3.1`                                            |
 
 ## Links
 
@@ -167,7 +168,6 @@ if (Test-Path -LiteralPath $repoProfile) {
 }
 
 New-DotfileJunction "$env:LOCALAPPDATA\nvim" "$HOME\.config\nvim"
-New-DotfileJunction "$env:APPDATA\alacritty" "$HOME\.config\alacritty"
 New-DotfileJunction "$env:APPDATA\leaf" "$HOME\.config\leaf"
 
 if (-not (Test-Path -LiteralPath "$HOME\.config\git\.gitconfig")) {
@@ -246,52 +246,75 @@ Get-Command nvim
 
 ## Window Management
 
-Komorebi, whkd, and YASB keep their configuration under this repository. Set these user environment variables once, then sign out and back in (or restart Windows) before relying on autostarted processes:
+GlazeWM keeps its configuration in this repository. `powershell/cli-init.ps1`
+synchronizes `GLAZEWM_CONFIG_PATH` for the current shell and future login
+processes:
 
 ```ps1
-$configRoot = "$HOME\.config"
-
-[Environment]::SetEnvironmentVariable('KOMOREBI_CONFIG_HOME', "$configRoot\komorebi", 'User')
-[Environment]::SetEnvironmentVariable('WHKD_CONFIG_HOME', "$configRoot\whkd", 'User')
-[Environment]::SetEnvironmentVariable('YASB_CONFIG_HOME', "$configRoot\yasb", 'User')
+$env:GLAZEWM_CONFIG_PATH
 ```
 
-For the current PowerShell session, start the components with:
+Link the repository-managed widget pack into Zebar's runtime directory:
 
 ```ps1
-$env:KOMOREBI_CONFIG_HOME = "$HOME\.config\komorebi"
-$env:WHKD_CONFIG_HOME = "$HOME\.config\whkd"
-$env:YASB_CONFIG_HOME = "$HOME\.config\yasb"
-
-komorebic start --whkd --config "$env:KOMOREBI_CONFIG_HOME\komorebi.json"
-yasb
+$zebarRoot = Join-Path $HOME '.glzr\zebar'
+New-Item -ItemType Directory -Path $zebarRoot -Force | Out-Null
+New-Item -ItemType Junction `
+  -Path (Join-Path $zebarRoot 'window-dotfiles') `
+  -Target (Join-Path $HOME '.config\zebar')
 ```
 
-YASB uses the `Komorebi Workspaces` widget and hides empty workspaces. The configured workspace layout is intentionally global across the two displays:
+For a first manual launch, run:
+
+```ps1
+glazewm start --config "$HOME\.config\glazewm\config.yaml"
+```
+
+Enable automatic startup with a Startup-folder shortcut:
+
+```ps1
+$config = Join-Path $HOME '.config\glazewm\config.yaml'
+$startupDir = [Environment]::GetFolderPath('Startup')
+$shortcutPath = Join-Path $startupDir 'GlazeWM.lnk'
+$shell = New-Object -ComObject WScript.Shell
+$shortcut = $shell.CreateShortcut($shortcutPath)
+$shortcut.TargetPath = (Get-Command glazewm).Source
+$shortcut.Arguments = "start --config `"$config`""
+$shortcut.WorkingDirectory = Split-Path $config -Parent
+$shortcut.Save()
+```
+
+The configured workspace layout follows the physical display order used by
+GlazeWM:
 
 | Display position | Workspace names | Global shortcuts |
 | ---------------- | --------------- | ---------------- |
 | Right            | `1`, `2`, `3`, `4` | `Alt+1` through `Alt+4` |
 | Left             | `5`, `6`, `7`, `8` | `Alt+5` through `Alt+8` |
 
-`Alt+Shift+1` through `Alt+Shift+8` move the focused window to the corresponding globally numbered workspace. `Alt+Shift+Space` cycles layouts, while `Alt+Shift+B` and `Alt+Shift+G` select BSP and Grid. `Alt+O` restarts whkd after editing `whkdrc`.
+`Alt+Shift+1` through `Alt+Shift+8` move the focused window to the corresponding
+workspace. `Alt+Shift+Space` toggles the tiling direction, `Alt+X` selects a
+horizontal split, `Alt+Y` selects a vertical split, and `Alt+Shift+O` reloads
+the configuration. Windows Terminal and the KakaoTalk main window are explicitly
+set to tiling through `window_rules`.
 
-KakaoTalk is explicitly managed through `komorebi/applications.json`, allowing its main window to tile and move between workspaces.
+GlazeWM launches the Zebar bar through `startup_commands`. Each monitor's
+40-pixel bar shows only the workspaces assigned to that monitor, marks occupied
+workspaces, displays the focused application and window title, and includes
+tiling direction, resize/pause modes, CPU, memory, battery, and the clock.
 
 ## Managed Paths
 
 | Repo path                                     | Runtime path                                                          | Method                          |
 | --------------------------------------------- | --------------------------------------------------------------------- | ------------------------------- |
-| `alacritty/`                                  | `%APPDATA%\alacritty`                                                 | `Junction`                      |
 | `nvim/`                                       | `%LOCALAPPDATA%\nvim`                                                 | `Junction`                      |
 | `git/.gitconfig.local.example`                | `git/.gitconfig` then `%USERPROFILE%\.gitconfig`                      | `local copy, then SymbolicLink` |
 | `powershell/Microsoft.PowerShell_profile.ps1` | `%USERPROFILE%\Documents\PowerShell\Microsoft.PowerShell_profile.ps1` | `profile stub`                  |
 | `wezterm/wezterm.lua`                         | `%USERPROFILE%\.wezterm.lua`                                          | `SymbolicLink`                  |
 | `windows-terminal/settings.json`              | `%LOCALAPPDATA%\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json` | `SymbolicLink (Stable)`         |
 | `psmux/psmux.conf`                            | `%USERPROFILE%\.config\psmux\psmux.conf`                              | `default path`                  |
-| `komorebi/`                                   | `KOMOREBI_CONFIG_HOME`                                                   | `environment variable`          |
-| `whkd/whkdrc`                                 | `WHKD_CONFIG_HOME\whkdrc`                                               | `environment variable`          |
-| `yasb/`                                       | `YASB_CONFIG_HOME`                                                       | `environment variable`          |
+| `glazewm/config.yaml`                           | `GLAZEWM_CONFIG_PATH`                                                | `environment variable`          |
+| `zebar/`                                      | `%USERPROFILE%\.glzr\zebar\window-dotfiles`                         | `Junction`                      |
 | `scoop/config.json`                           | `%USERPROFILE%\.config\scoop\config.json`                             | `default path`                  |
 | `gh-dash/config.yml`                          | `%USERPROFILE%\.config\gh-dash\config.yml`                            | `default path`                  |
 | `starship/starship.toml`                      | `STARSHIP_CONFIG`                                                     | `environment variable`          |

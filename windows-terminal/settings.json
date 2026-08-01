@@ -44,24 +44,24 @@
             "keys": "ctrl+space"
         },
         {
-            "id": "unbound",
-            "keys": "ctrl+v"
+            "id": "User.CtrlHAsAltH",
+            "keys": "ctrl+h"
         },
         {
             "id": "unbound",
             "keys": "alt+shift+up"
         },
         {
-            "id": "User.CtrlHAsAltH",
-            "keys": "ctrl+h"
-        },
-        {
             "id": "unbound",
-            "keys": "alt+down"
+            "keys": "ctrl+v"
         },
         {
             "id": "User.CtrlJAsAltJ",
             "keys": "ctrl+j"
+        },
+        {
+            "id": "unbound",
+            "keys": "alt+down"
         },
         {
             "id": "User.ShiftEnter",
@@ -132,6 +132,7 @@
         "list":
         [
             {
+                "elevate": false,
                 "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
                 "hidden": false,
                 "name": "PowerShell",
