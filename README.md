@@ -1,322 +1,75 @@
-# Windows CLI Configuration
+# Windows Dotfiles
 
-Windows CLI dotfiles for a PowerShell 7 based environment. This repo is intended to live at:
+PowerShell, Windows Terminal, Neovim, Yazi, GlazeWM, and Zebar configuration for Windows 11.
 
-```ps1
-$HOME\.config
-```
+The repository must be cloned to `%USERPROFILE%\.config`.
 
-## Tools
+## Install
 
-- Windows package manager: `scoop`
-- Emulator: Windows Terminal, optional `wezterm`
-- Multiplexer: `psmux`
-- Editor: `neovim`
-- Notes editor: `obsidian` with Vim mode
-- Shell: `PowerShell 7`
-- File manager: `yazi`
-- Prompt: `starship`
-- Tiling window manager: `GlazeWM`
-- Status bar: `Zebar`
-- CLI tools: `git`, `gh`, `lazygit`, `eza`, `bat`, `btop`, `fzf`, `zoxide`, `ripgrep`, `fd`, `uv`, `csvlens`, `ffmpeg`, `7zip`, `jq`, `poppler`, `resvg`, `imagemagick`, `tree-sitter`, `mingw`, `nodejs-lts`
+Requirements:
 
-## Installation
+- Windows 11
+- PowerShell
+- Git
+- Windows Terminal Stable
+- Windows Developer Mode or an elevated shell for symbolic links
 
-Install Scoop from normal non-admin PowerShell:
+Back up an existing `.config`, clone the repository, and run the setup script:
 
-```ps1
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
-```
+```powershell
+$config = Join-Path $HOME '.config'
+$backup = $null
 
-If the install fails, use the official instructions: https://github.com/ScoopInstaller/Install
-
-If you are running elevated/admin PowerShell, follow the official `-RunAsAdmin` guidance from that repo.
-
-Add buckets and install `git` before cloning:
-
-```ps1
-scoop bucket add extras
-scoop bucket add nerd-fonts
-
-scoop install git
-```
-
-Move any existing non-empty `~\.config` to a timestamped backup, clone this repo, then restore Scoop's runtime-local `.config\scoop` directory if Scoop created it before the clone. `scoop/` is gitignored.
-
-```ps1
-$configPath = Join-Path $HOME '.config'
-$backupPath = $null
-
-if (Test-Path -LiteralPath $configPath) {
-  $hasContent = @(Get-ChildItem -LiteralPath $configPath -Force -ErrorAction SilentlyContinue).Count -gt 0
-  if ($hasContent) {
-    $backupPath = "$configPath.backup.$(Get-Date -Format 'yyyyMMddHHmmss')"
-    Move-Item -LiteralPath $configPath -Destination $backupPath
-    Write-Host "Backed up existing .config to $backupPath"
-  } else {
-    Remove-Item -LiteralPath $configPath -Force
-  }
+if (Test-Path $config) {
+    $backup = "$config.backup.$(Get-Date -Format 'yyyyMMddHHmmss')"
+    Move-Item $config $backup
 }
 
-git clone https://github.com/DS-argus/window-dotfiles.git $configPath
-Set-Location $configPath
+git clone https://github.com/DS-argus/window-dotfiles.git $config
 
-if ($backupPath -and (Test-Path -LiteralPath "$backupPath\scoop")) {
-  Move-Item -LiteralPath "$backupPath\scoop" -Destination "$configPath\scoop"
+if ($backup -and (Test-Path "$backup\scoop")) {
+    Move-Item "$backup\scoop" "$config\scoop"
 }
+
+& "$config\setup.ps1"
 ```
 
-Install the remaining packages:
+The backup is preserved. Restore any other files you still need after installation.
 
-```ps1
-scoop install `
-  pwsh psmux starship yazi neovim `
-  gh lazygit `
-  ffmpeg 7zip jq poppler fd ripgrep fzf zoxide resvg imagemagick `
-  tree-sitter mingw `
-  btop bat eza uv csvlens nodejs-lts `
-  JetBrainsMono-NF D2Coding-NF
+## Setup script
+
+`setup.ps1` can be run repeatedly. It:
+
+- Installs Scoop when missing
+- Reuses Git from PATH, Scoop, or a Git for Windows installation
+- Installs the required Scoop packages and Leaf
+- Connects the PowerShell, Git, Windows Terminal, Neovim, Yazi, and Leaf configs
+- Configures GlazeWM and Zebar
+- Registers `GLAZEWM_CONFIG_PATH`
+- Adds GlazeWM to Windows startup
+- Installs Yazi packages
+- Backs up conflicting managed paths as `.backup.<timestamp>`
+
+Optional flags:
+
+```powershell
+& "$HOME\.config\setup.ps1" -SkipPackages
+& "$HOME\.config\setup.ps1" -SkipWindowManager
 ```
 
-Optionally install WezTerm:
+## After installation
 
-```ps1
-scoop install wezterm
-```
+Set the local Git identity and authenticate GitHub CLI:
 
-Install the tiling window manager and status bar:
-
-```ps1
-scoop install glazewm zebar
-```
-
-Reference versions:
-
-| Tool              | Version                                            |
-| ----------------- | -------------------------------------------------- |
-| `git`             | `2.54.0`                                           |
-| `pwsh`            | `7.6.2`                                            |
-| `neovim`          | `0.12.2`                                           |
-| `nvim-treesitter` | `main`, `4916d6592ede8c07973490d9322f187e07dfefac` |
-| `tree-sitter`     | `0.26.9`                                           |
-| `mingw`           | `16.1.0-rt_v14-rev1`                               |
-| `yazi`            | `26.5.6`                                           |
-| `starship`        | `1.26.0`                                           |
-| `psmux`           | `3.3.6`                                            |
-| `glazewm`        | `3.10.1`                                           |
-| `zebar`          | `3.3.1`                                            |
-
-## Links
-
-Create runtime links and the PowerShell profile stub:
-
-```ps1
-Set-Location "$HOME\.config"
-
-function Backup-Path {
-  param([Parameter(Mandatory)] [string] $Path)
-
-  if (-not (Test-Path -LiteralPath $Path)) {
-    return
-  }
-
-  $item = Get-Item -LiteralPath $Path -Force
-  if ($item.LinkType -eq 'Junction' -or $item.LinkType -eq 'SymbolicLink') {
-    Remove-Item -LiteralPath $Path -Force
-    return
-  }
-
-  $backup = "$Path.backup.$(Get-Date -Format 'yyyyMMddHHmmss')"
-  Move-Item -LiteralPath $Path -Destination $backup
-}
-
-function New-DotfileJunction {
-  param(
-    [Parameter(Mandatory)] [string] $Path,
-    [Parameter(Mandatory)] [string] $Target
-  )
-
-  New-Item -ItemType Directory -Force -Path (Split-Path -Parent $Path) | Out-Null
-  Backup-Path $Path
-  New-Item -ItemType Junction -Path $Path -Target $Target | Out-Null
-}
-
-function New-DotfileSymlink {
-  param(
-    [Parameter(Mandatory)] [string] $Path,
-    [Parameter(Mandatory)] [string] $Target
-  )
-
-  New-Item -ItemType Directory -Force -Path (Split-Path -Parent $Path) | Out-Null
-  Backup-Path $Path
-  New-Item -ItemType SymbolicLink -Path $Path -Target $Target | Out-Null
-}
-
-function New-PowerShellProfileStub {
-  $profilePath = "$HOME\Documents\PowerShell\Microsoft.PowerShell_profile.ps1"
-
-  New-Item -ItemType Directory -Force -Path (Split-Path -Parent $profilePath) | Out-Null
-  Backup-Path $profilePath
-
-  @'
-$repoProfile = Join-Path $HOME '.config\powershell\Microsoft.PowerShell_profile.ps1'
-if (Test-Path -LiteralPath $repoProfile) {
-    . $repoProfile
-}
-'@ | Set-Content -LiteralPath $profilePath -Encoding UTF8
-}
-
-New-DotfileJunction "$env:LOCALAPPDATA\nvim" "$HOME\.config\nvim"
-New-DotfileJunction "$env:APPDATA\leaf" "$HOME\.config\leaf"
-
-if (-not (Test-Path -LiteralPath "$HOME\.config\git\.gitconfig")) {
-  Copy-Item "$HOME\.config\git\.gitconfig.local.example" "$HOME\.config\git\.gitconfig"
-}
-
-New-DotfileSymlink "$HOME\.gitconfig" "$HOME\.config\git\.gitconfig"
-New-DotfileSymlink "$HOME\.wezterm.lua" "$HOME\.config\wezterm\wezterm.lua"
-
-$windowsTerminalPackage = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe'
-if (Test-Path -LiteralPath $windowsTerminalPackage) {
-  New-DotfileSymlink `
-    (Join-Path $windowsTerminalPackage 'LocalState\settings.json') `
-    "$HOME\.config\windows-terminal\settings.json"
-} else {
-  Write-Warning 'Windows Terminal Stable package was not found; skipped its settings link.'
-}
-
-New-PowerShellProfileStub
-```
-
-Symbolic links may require Developer Mode or admin PowerShell. The PowerShell profile uses a real stub file instead of a symlink.
-
-The Windows Terminal path above is for the Stable Store/MSIX package. Preview, Canary, and unpackaged distributions use different settings paths. Only `settings.json` is linked; machine-local files such as `state.json` and `elevated-state.json` must not be linked or copied.
-
-## Post-install
-
-Install Yazi packages:
-
-```ps1
-ya pkg install
-```
-
-Set local Git identity in the ignored config created from the tracked example:
-
-```ps1
+```powershell
 nvim "$HOME\.config\git\.gitconfig"
-```
-
-Local Git aliases and `[user]` identity live in ignored `git/.gitconfig`. Only `git/.gitconfig.local.example` is tracked as the template.
-
-Set up GitHub CLI:
-
-```ps1
 gh auth login
-gh extension install dlvhdr/gh-dash
 ```
 
-Set up Neovim:
+Open a new PowerShell session to load the profile. GlazeWM and Zebar start automatically at the next sign-in.
 
-```vim
-:Lazy sync
-:MasonInstall lua-language-server pyright rust-analyzer ruff stylua prettier gopls goimports
+Reload GlazeWM after editing its configuration:
+
+```powershell
+glazewm command wm-reload-config
 ```
-
-Set up Obsidian Vim bindings by copying or linking `obsidian/.obsidian.vimrc` into the vault root that uses the Vimrc plugin.
-
-`STARSHIP_CONFIG`, `YAZI_CONFIG_HOME`, `YAZI_FILE_ONE`, `EDITOR`, `VISUAL`, and `GIT_EDITOR` are already set by `powershell/cli-init.ps1`.
-
-`YAZI_FILE_ONE` uses Scoop Git's `file.exe` first, then the Program Files Git fallback if present.
-
-Neovim 0.12 uses `nvim-treesitter` `main`; `tree-sitter` and `mingw` are required to avoid Markdown Treesitter/render-markdown failures.
-
-Verify the shell environment:
-
-```ps1
-$PSVersionTable.PSEdition  # Core
-$PROFILE                   # ...\Documents\PowerShell\Microsoft.PowerShell_profile.ps1
-$env:STARSHIP_CONFIG
-$env:STARSHIP_SHELL        # pwsh
-$env:YAZI_CONFIG_HOME
-$env:YAZI_FILE_ONE
-Get-Command starship
-Get-Command nvim
-```
-
-## Window Management
-
-GlazeWM keeps its configuration in this repository. `powershell/cli-init.ps1`
-synchronizes `GLAZEWM_CONFIG_PATH` for the current shell and future login
-processes:
-
-```ps1
-$env:GLAZEWM_CONFIG_PATH
-```
-
-Link the repository-managed widget pack into Zebar's runtime directory:
-
-```ps1
-$zebarRoot = Join-Path $HOME '.glzr\zebar'
-New-Item -ItemType Directory -Path $zebarRoot -Force | Out-Null
-New-Item -ItemType Junction `
-  -Path (Join-Path $zebarRoot 'window-dotfiles') `
-  -Target (Join-Path $HOME '.config\zebar')
-```
-
-For a first manual launch, run:
-
-```ps1
-glazewm start --config "$HOME\.config\glazewm\config.yaml"
-```
-
-Enable automatic startup with a Startup-folder shortcut:
-
-```ps1
-$config = Join-Path $HOME '.config\glazewm\config.yaml'
-$startupDir = [Environment]::GetFolderPath('Startup')
-$shortcutPath = Join-Path $startupDir 'GlazeWM.lnk'
-$shell = New-Object -ComObject WScript.Shell
-$shortcut = $shell.CreateShortcut($shortcutPath)
-$shortcut.TargetPath = (Get-Command glazewm).Source
-$shortcut.Arguments = "start --config `"$config`""
-$shortcut.WorkingDirectory = Split-Path $config -Parent
-$shortcut.Save()
-```
-
-The configured workspace layout follows the physical display order used by
-GlazeWM:
-
-| Display position | Workspace names | Global shortcuts |
-| ---------------- | --------------- | ---------------- |
-| Right            | `1`, `2`, `3`, `4` | `Alt+1` through `Alt+4` |
-| Left             | `5`, `6`, `7`, `8` | `Alt+5` through `Alt+8` |
-
-`Alt+Shift+1` through `Alt+Shift+8` move the focused window to the corresponding
-workspace. `Alt+Shift+Space` toggles the tiling direction, `Alt+X` selects a
-horizontal split, `Alt+Y` selects a vertical split, and `Alt+Shift+O` reloads
-the configuration. Windows Terminal and the KakaoTalk main window are explicitly
-set to tiling through `window_rules`.
-
-GlazeWM launches the Zebar bar through `startup_commands`. Each monitor's
-40-pixel bar shows only the workspaces assigned to that monitor, marks occupied
-workspaces, displays the focused application and window title, and includes
-tiling direction, resize/pause modes, CPU, memory, battery, and the clock.
-
-## Managed Paths
-
-| Repo path                                     | Runtime path                                                          | Method                          |
-| --------------------------------------------- | --------------------------------------------------------------------- | ------------------------------- |
-| `nvim/`                                       | `%LOCALAPPDATA%\nvim`                                                 | `Junction`                      |
-| `git/.gitconfig.local.example`                | `git/.gitconfig` then `%USERPROFILE%\.gitconfig`                      | `local copy, then SymbolicLink` |
-| `powershell/Microsoft.PowerShell_profile.ps1` | `%USERPROFILE%\Documents\PowerShell\Microsoft.PowerShell_profile.ps1` | `profile stub`                  |
-| `wezterm/wezterm.lua`                         | `%USERPROFILE%\.wezterm.lua`                                          | `SymbolicLink`                  |
-| `windows-terminal/settings.json`              | `%LOCALAPPDATA%\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\settings.json` | `SymbolicLink (Stable)`         |
-| `psmux/psmux.conf`                            | `%USERPROFILE%\.config\psmux\psmux.conf`                              | `default path`                  |
-| `glazewm/config.yaml`                           | `GLAZEWM_CONFIG_PATH`                                                | `environment variable`          |
-| `zebar/`                                      | `%USERPROFILE%\.glzr\zebar\window-dotfiles`                         | `Junction`                      |
-| `scoop/config.json`                           | `%USERPROFILE%\.config\scoop\config.json`                             | `default path`                  |
-| `gh-dash/config.yml`                          | `%USERPROFILE%\.config\gh-dash\config.yml`                            | `default path`                  |
-| `starship/starship.toml`                      | `STARSHIP_CONFIG`                                                     | `environment variable`          |
-| `yazi/`                                       | `YAZI_CONFIG_HOME`                                                    | `environment variable`          |
-| `obsidian/.obsidian.vimrc`                    | `<vault>\.obsidian.vimrc`                                             | `manual per vault`              |
