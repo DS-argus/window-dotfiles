@@ -16,17 +16,15 @@ $env:PATH = @(
 $env:STARSHIP_CONFIG = Join-Path $HOME '.config\starship\starship.toml'
 $env:YAZI_CONFIG_HOME = Join-Path $HOME '.config\yazi'
 
-# komorebi, whkd, YASB가 같은 저장소 안의 설정을 사용하도록 현재 셸과
-# 사용자 환경 변수를 자동으로 동기화한다. 사용자 환경 변수는 로그인 후
-# 시작되는 GUI/자동시작 프로세스에도 전달된다.
+# GlazeWM이 저장소 안의 설정 파일을 사용하도록 현재 셸과 사용자 환경
+# 변수를 자동으로 동기화한다. 사용자 환경 변수는 로그인 후 시작되는
+# GUI/자동시작 프로세스에도 전달된다.
 $dotfilesRoot = Split-Path -Parent $PSScriptRoot
-$windowManagerConfigHomes = @{
-    KOMOREBI_CONFIG_HOME = Join-Path $dotfilesRoot 'komorebi'
-    WHKD_CONFIG_HOME     = Join-Path $dotfilesRoot 'whkd'
-    YASB_CONFIG_HOME     = Join-Path $dotfilesRoot 'yasb'
+$windowManagerConfigPaths = @{
+    GLAZEWM_CONFIG_PATH = Join-Path $dotfilesRoot 'glazewm\config.yaml'
 }
 
-foreach ($entry in $windowManagerConfigHomes.GetEnumerator()) {
+foreach ($entry in $windowManagerConfigPaths.GetEnumerator()) {
     Set-Item -Path "Env:$($entry.Key)" -Value $entry.Value
 
     if ([Environment]::GetEnvironmentVariable($entry.Key, 'User') -ne $entry.Value) {
