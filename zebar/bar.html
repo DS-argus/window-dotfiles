@@ -20,11 +20,56 @@
 
       const providers = zebar.createProviderGroup({
         glazewm: { type: 'glazewm' },
-        date: { type: 'date', formatting: 'yyyy-MM-dd HH:mm' },
+        date: { type: 'date', formatting: 'MM/dd HH:mm' },
         cpu: { type: 'cpu', refreshInterval: 3000 },
         memory: { type: 'memory', refreshInterval: 3000 },
         battery: { type: 'battery', refreshInterval: 5000 },
+        audio: { type: 'audio' },
       });
+
+      const appIcons = {
+        applicationframehost: '󰍹',
+        chatgpt: '󰭹',
+        chrome: '',
+        code: '󰨞',
+        discord: '',
+        explorer: '',
+        firefox: '',
+        kakaotalk: '󰘅',
+        msedge: '󰇩',
+        notepad: '󰈙',
+        spotify: '',
+        windowsterminal: '',
+      };
+
+      function collectWindows(container) {
+        if (!container) return [];
+        if (container.type === 'window') return [container];
+        return (container.children ?? []).flatMap(collectWindows);
+      }
+
+      function workspaceApplications(workspace) {
+        const applications = new Map();
+
+        collectWindows(workspace).forEach(window => {
+          if (window.processName && !applications.has(window.processName)) {
+            applications.set(window.processName, window);
+          }
+        });
+
+        return [...applications.values()];
+      }
+
+      function iconForProcess(processName) {
+        return appIcons[processName?.toLowerCase()] ?? '󰣆';
+      }
+
+      function volumeIcon(device, volume) {
+        if (!device || device.isMuted || volume === 0) return '󰖁';
+        if (volume < 35) return '󰕿';
+        if (volume < 70) return '󰖀';
+        return '󰕾';
+      }
 
       function App() {
         const [output, setOutput] = useState(providers.outputMap);
@@ -38,31 +83,58 @@
           glazewm?.focusedContainer?.type === 'window'
             ? glazewm.focusedContainer
             : null;
-        const currentWorkspaces = [...(glazewm?.currentWorkspaces ?? [])].sort(
-          (left, right) =>
-            Number(left.name) - Number(right.name) ||
-            left.name.localeCompare(right.name),
-        );
+        const currentWorkspaces = [...(glazewm?.currentWorkspaces ?? [])]
+          .filter(
+            workspace =>
+              workspaceApplications(workspace).length > 0 ||
+              workspace.isDisplayed ||
+              workspace.hasFocus,
+          )
+          .sort(
+            (left, right) =>
+              Number(left.name) - Number(right.name) ||
+              left.name.localeCompare(right.name),
+          );
+        const batteryPercent = output.battery
+          ? Math.max(0, Math.min(100, Math.round(output.battery.chargePercent)))
+          : null;
+        const playbackDevice = output.audio?.defaultPlaybackDevice;
+        const volume = playbackDevice
+          ? Math.max(0, Math.min(100, Math.round(playbackDevice.volume)))
+          : null;
 
         return (
           <main className="bar">
             <section className="left">
-              <span className="logo">G</span>
               <div className="workspaces">
                 {currentWorkspaces.map(workspace => {
-                  const isOccupied = (workspace.children?.length ?? 0) > 0;
+                  const applications = workspaceApplications(workspace);
+                  const isOccupied = applications.length > 0;
+                  const appNames = applications.map(application => application.processName).join(', ');
 
                   return (
                     <button
                       className={`workspace${isOccupied ? ' occupied' : ''}${workspace.isDisplayed ? ' displayed' : ''}${workspace.hasFocus ? ' focused' : ''}`}
                       key={workspace.name}
                       onClick={() => glazewm.runCommand(`focus --workspace ${workspace.name}`)}
-                      title={`Workspace ${workspace.name}${isOccupied ? ' · occupied' : ' · empty'}`}
+                      title={`Workspace ${workspace.name}${appNames ? ` · ${appNames}` : ' · empty'}`}
                     >
                       <span className="workspace-label">
                         {workspace.displayName ?? workspace.name}
                       </span>
-                      <span className="occupancy" aria-hidden="true"></span>
+                      {isOccupied && (
+                        <span className="workspace-apps" aria-label={appNames}>
+                          {applications.map(application => (
+                            <span
+                              className="workspace-app-icon"
+                              key={application.processName}
+                              title={application.processName}
+                            >
+                              {iconForProcess(application.processName)}
+                            </span>
+                          ))}
+                        </span>
+                      )}
                     </button>
                   );
                 })}
@@ -97,25 +169,53 @@
                 <button
                   className="direction"
                   onClick={() => glazewm.runCommand('toggle-tiling-direction')}
-                  title="Toggle tiling direction"
+                  title={`Tiling · ${glazewm.tilingDirection}`}
                 >
                   {glazewm.tilingDirection === 'horizontal' ? 'H' : 'V'}
                 </button>
               )}
+              {playbackDevice && (
+                <button
+                  className={`compact audio${playbackDevice.isMuted ? ' muted' : ''}`}
+                  title={`${playbackDevice.name} · ${playbackDevice.isMuted ? 'Muted' : `${volume}%`}`}
+                  onClick={() => output.audio.setMute(!playbackDevice.isMuted)}
+                  onWheel={event => {
+                    event.preventDefault();
+                    const nextVolume = Math.max(0, Math.min(100, volume - Math.sign(event.deltaY) * 5));
+                    output.audio.setVolume(nextVolume);
+                  }}
+                >
+                  <span className="compact-icon">{volumeIcon(playbackDevice, volume)}</span>
+                  <span>{volume}</span>
+                </button>
+              )}
               {output.cpu && (
-                <span className={output.cpu.usage > 85 ? 'metric warning' : 'metric'}>
-                  CPU {Math.round(output.cpu.usage)}%
+                <span
+                  className={output.cpu.usage > 85 ? 'compact warning' : 'compact'}
+                  title={`CPU · ${Math.round(output.cpu.usage)}%`}
+                >
+                  <span className="compact-icon"></span>
+                  <span>{Math.round(output.cpu.usage)}</span>
                 </span>
               )}
               {output.memory && (
-                <span className="metric">MEM {Math.round(output.memory.usage)}%</span>
-              )}
-              {output.battery && (
-                <span className="metric">
-                  {output.battery.isCharging ? 'AC' : 'BAT'} {Math.round(output.battery.chargePercent)}%
+                <span className="compact" title={`Memory · ${Math.round(output.memory.usage)}%`}>
+                  <span className="compact-icon">󰍛</span>
+                  <span>{Math.round(output.memory.usage)}</span>
                 </span>
               )}
-              <span className="clock">{output.date?.formatted}</span>
+              {output.battery && (
+                <span
+                  className={`compact battery${batteryPercent <= 20 ? ' warning' : ''}${output.battery.isCharging ? ' charging' : ''}`}
+                  title={`${output.battery.isCharging ? 'Charging' : 'Battery'} · ${batteryPercent}%`}
+                >
+                  <span className="compact-icon">{output.battery.isCharging ? '󰂄' : '󰁹'}</span>
+                  <span>{batteryPercent}</span>
+                </span>
+              )}
+              <span className="clock" title={output.date?.formatted}>
+                {output.date?.formatted}
+              </span>
             </section>
           </main>
         );
