@@ -1,7 +1,8 @@
 [CmdletBinding()]
 param(
     [switch] $SkipPackages,
-    [switch] $SkipWindowManager
+    [switch] $SkipWindowManager,
+    [switch] $Yes
 )
 
 Set-StrictMode -Version Latest
@@ -19,6 +20,39 @@ function Write-Section {
     Write-Host "`n==> $Message" -ForegroundColor Cyan
 }
 
+function Confirm-Step {
+    param(
+        [Parameter(Mandatory)] [string] $Title,
+        [Parameter(Mandatory)] [string[]] $Details
+    )
+
+    Write-Section $Title
+    foreach ($detail in $Details) {
+        Write-Host "  - $detail"
+    }
+
+    if ($Yes) {
+        Write-Host '  Approved by -Yes.' -ForegroundColor Green
+        return $true
+    }
+
+    while ($true) {
+        $response = (Read-Host 'Continue? [y/n]').Trim().ToLowerInvariant()
+        switch ($response) {
+            'y' { return $true }
+            'yes' { return $true }
+            'n' {
+                Write-Host '  Skipped.' -ForegroundColor DarkYellow
+                return $false
+            }
+            'no' {
+                Write-Host '  Skipped.' -ForegroundColor DarkYellow
+                return $false
+            }
+            default { Write-Host "Enter 'y' or 'n'." -ForegroundColor Yellow }
+        }
+    }
+}
 function Backup-Path {
     param([Parameter(Mandatory)] [string] $Path)
 
@@ -168,12 +202,32 @@ function Install-ScoopPackages {
         'JetBrainsMono-NF', 'D2Coding-NF', 'glazewm', 'zebar'
     )
 
-    scoop install @packages
+    $failedPackages = [System.Collections.Generic.List[string]]::new()
+    foreach ($package in $packages) {
+        Write-Host "Installing Scoop package: $package"
+        try {
+            $global:LASTEXITCODE = 0
+            scoop install $package
+            if ($LASTEXITCODE -ne 0) {
+                throw "Scoop exited with code $LASTEXITCODE."
+            }
+        } catch {
+            $failedPackages.Add($package)
+            Write-Warning "Skipped '$package': $($_.Exception.Message)"
+        }
+    }
 
     if (Get-Command leaf -ErrorAction SilentlyContinue) {
         Write-Host 'Leaf is already installed.'
     } else {
         npm install --global '@rivolink/leaf'
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warning "Leaf installation failed with exit code $LASTEXITCODE."
+        }
+    }
+
+    if ($failedPackages.Count -gt 0) {
+        Write-Warning "Failed Scoop packages: $($failedPackages -join ', ')"
     }
 }
 
@@ -191,56 +245,94 @@ function Set-WindowManagerStartup {
     Write-Host "Configured startup: $shortcutPath"
 }
 
-if (-not $SkipPackages) {
-    Write-Section 'Installing packages'
-    Install-ScoopPackages
-}
-
-Write-Section 'Creating managed paths'
-New-ManagedLink -Type Junction -Path (Join-Path $env:LOCALAPPDATA 'nvim') -Target (Join-Path $repoRoot 'nvim')
-New-ManagedLink -Type Junction -Path (Join-Path $env:APPDATA 'leaf') -Target (Join-Path $repoRoot 'leaf')
-New-ManagedLink -Type Junction -Path (Join-Path $HOME '.glzr\zebar\window-dotfiles') -Target (Join-Path $repoRoot 'zebar')
-
 $localGitConfig = Join-Path $repoRoot 'git\.gitconfig'
-if (-not (Test-Path -LiteralPath $localGitConfig)) {
-    Copy-Item (Join-Path $repoRoot 'git\.gitconfig.local.example') $localGitConfig
-    Write-Host "Created local Git config: $localGitConfig"
+
+if (-not $SkipPackages) {
+    $packageDetails = @(
+        'Install Scoop when it is missing.',
+        'Reuse an existing Git installation, or install Git with Scoop when missing.',
+        'Install the configured CLI tools, fonts, GlazeWM, and Zebar when missing.',
+        'Install Leaf globally with npm when it is missing.',
+        'A failed package is reported and skipped; remaining packages continue.'
+    )
+    if (Confirm-Step -Title 'Install packages' -Details $packageDetails) {
+        try {
+            Install-ScoopPackages
+        } catch {
+            Write-Warning "Package setup stopped: $($_.Exception.Message)"
+        }
+    }
 }
-New-ManagedLink -Type SymbolicLink -Path (Join-Path $HOME '.gitconfig') -Target $localGitConfig
 
+$linkDetails = @(
+    "Create junctions for Neovim, Leaf, and Zebar.",
+    "Create symbolic links for Git and Windows Terminal settings.",
+    "Create the PowerShell profile stub.",
+    "Existing conflicting paths are moved to .backup.<timestamp>."
+)
+if (Confirm-Step -Title 'Create managed config links' -Details $linkDetails) {
+    Write-Section 'Creating managed paths'
+    New-ManagedLink -Type Junction -Path (Join-Path $env:LOCALAPPDATA 'nvim') -Target (Join-Path $repoRoot 'nvim')
+    New-ManagedLink -Type Junction -Path (Join-Path $env:APPDATA 'leaf') -Target (Join-Path $repoRoot 'leaf')
+    New-ManagedLink -Type Junction -Path (Join-Path $HOME '.glzr\zebar\window-dotfiles') -Target (Join-Path $repoRoot 'zebar')
 
-$terminalPackage = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe'
-if (Test-Path -LiteralPath $terminalPackage) {
-    New-ManagedLink `
-        -Type SymbolicLink `
-        -Path (Join-Path $terminalPackage 'LocalState\settings.json') `
-        -Target (Join-Path $repoRoot 'windows-terminal\settings.json')
-} else {
-    Write-Warning 'Windows Terminal Stable was not found; skipped its settings link.'
+    if (-not (Test-Path -LiteralPath $localGitConfig)) {
+        Copy-Item (Join-Path $repoRoot 'git\.gitconfig.local.example') $localGitConfig
+        Write-Host "Created local Git config: $localGitConfig"
+    }
+    New-ManagedLink -Type SymbolicLink -Path (Join-Path $HOME '.gitconfig') -Target $localGitConfig
+
+    $terminalPackage = Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe'
+    if (Test-Path -LiteralPath $terminalPackage) {
+        New-ManagedLink `
+            -Type SymbolicLink `
+            -Path (Join-Path $terminalPackage 'LocalState\settings.json') `
+            -Target (Join-Path $repoRoot 'windows-terminal\settings.json')
+    } else {
+        Write-Warning 'Windows Terminal Stable was not found; skipped its settings link.'
+    }
+
+    Set-PowerShellProfileStub
 }
 
-Set-PowerShellProfileStub
-
-Write-Section 'Configuring environment'
 $glazeConfig = Join-Path $repoRoot 'glazewm\config.yaml'
-[Environment]::SetEnvironmentVariable('GLAZEWM_CONFIG_PATH', $glazeConfig, 'User')
-$env:GLAZEWM_CONFIG_PATH = $glazeConfig
+if (Confirm-Step -Title 'Configure user environment' -Details @(
+    "Set GLAZEWM_CONFIG_PATH to $glazeConfig for this shell and future sessions."
+)) {
+    Write-Section 'Configuring environment'
+    [Environment]::SetEnvironmentVariable('GLAZEWM_CONFIG_PATH', $glazeConfig, 'User')
+    $env:GLAZEWM_CONFIG_PATH = $glazeConfig
+}
 
 if (-not $SkipWindowManager) {
-    if (-not (Get-Command glazewm -ErrorAction SilentlyContinue)) {
-        throw 'GlazeWM is not installed. Run without -SkipPackages or install it first.'
+    $startupPath = Join-Path ([Environment]::GetFolderPath('Startup')) 'GlazeWM.lnk'
+    if (Confirm-Step -Title 'Configure GlazeWM startup' -Details @(
+        "Create or update $startupPath.",
+        "Start GlazeWM with $glazeConfig at the next sign-in."
+    )) {
+        if (-not (Get-Command glazewm -ErrorAction SilentlyContinue)) {
+            Write-Warning 'GlazeWM is not installed; skipped startup registration.'
+        } else {
+            Set-WindowManagerStartup
+        }
     }
-    Set-WindowManagerStartup
 }
 
 if (Get-Command ya -ErrorAction SilentlyContinue) {
-    Write-Section 'Installing Yazi packages'
-    ya pkg install
+    if (Confirm-Step -Title 'Install Yazi packages' -Details @(
+        'Download and deploy packages declared in yazi/package.toml.'
+    )) {
+        Write-Section 'Installing Yazi packages'
+        ya pkg install
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warning "Yazi package installation failed with exit code $LASTEXITCODE."
+        }
+    }
 }
 
 Write-Section 'Setup complete'
 Write-Host 'Restart PowerShell to load the profile.'
 Write-Host "Edit Git identity in: $localGitConfig"
 if (-not $SkipWindowManager) {
-    Write-Host 'GlazeWM will start at the next sign-in. Start it now with: glazewm start'
+    Write-Host 'GlazeWM starts automatically only when the startup step was approved.'
 }

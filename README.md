@@ -50,11 +50,14 @@ The backup is preserved. Restore any other files you still need after installati
 - Installs Yazi packages
 - Backs up conflicting managed paths as `.backup.<timestamp>`
 
+Each stage prints the actions it will perform and waits for `y` or `n`. Package failures are reported and skipped so the remaining packages can continue.
+
 Optional flags:
 
 ```powershell
 & "$HOME\.config\setup.ps1" -SkipPackages
 & "$HOME\.config\setup.ps1" -SkipWindowManager
+& "$HOME\.config\setup.ps1" -Yes                # approve every stage
 ```
 
 ## After installation
