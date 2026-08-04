@@ -28,18 +28,18 @@
       });
 
       const appIcons = {
-        applicationframehost: '󰍹',
-        chatgpt: '󰭹',
-        chrome: '',
-        code: '󰨞',
-        discord: '',
-        explorer: '',
-        firefox: '',
-        kakaotalk: '󰘅',
-        msedge: '󰇩',
-        notepad: '󰈙',
-        spotify: '',
-        windowsterminal: '',
+        applicationframehost: ':gear:',
+        chatgpt: ':openai:',
+        chrome: ':google_chrome:',
+        code: ':code:',
+        discord: ':discord:',
+        explorer: ':finder:',
+        firefox: ':firefox:',
+        kakaotalk: ':kakaotalk:',
+        msedge: ':microsoft_edge:',
+        notepad: ':textedit:',
+        spotify: ':spotify:',
+        windowsterminal: ':terminal:',
       };
 
       function collectWindows(container) {
@@ -61,7 +61,7 @@
       }
 
       function iconForProcess(processName) {
-        return appIcons[processName?.toLowerCase()] ?? '󰣆';
+        return appIcons[processName?.toLowerCase()] ?? ':default:';
       }
 
       function volumeIcon(device, volume) {

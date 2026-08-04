@@ -1,3 +1,9 @@
+@font-face {
+  font-family: 'sketchybar-app-font';
+  src: url('./fonts/sketchybar-app-font.ttf') format('truetype');
+  font-display: block;
+}
+
 :root {
   --base: #2e3440;
   --mantle: #242933;
@@ -173,6 +179,9 @@ button {
 }
 
 .workspace-app-icon {
+  font-family: 'sketchybar-app-font';
+  font-variant-ligatures: discretionary-ligatures;
+  font-feature-settings: 'liga' 1, 'dlig' 1;
   display: inline-grid;
   min-width: 12px;
   font-size: 13px;
