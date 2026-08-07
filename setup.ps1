@@ -348,7 +348,7 @@ if (Confirm-Step -Title 'Create managed config links' -Details $linkDetails) {
     New-ManagedLink -Type Junction -Path (Join-Path $HOME '.glzr\zebar\window-dotfiles') -Target (Join-Path $repoRoot 'zebar')
 
     if (-not (Test-Path -LiteralPath $localGitConfig)) {
-        Copy-Item (Join-Path $repoRoot 'git\.gitconfig.local.example') $localGitConfig
+        Copy-Item (Join-Path $repoRoot 'git\.gitconfig.example') $localGitConfig
         Write-Host "Created local Git config: $localGitConfig"
     }
     New-ManagedLink -Type SymbolicLink -Path (Join-Path $HOME '.gitconfig') -Target $localGitConfig
