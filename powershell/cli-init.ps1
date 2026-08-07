@@ -19,21 +19,11 @@ $env:YAZI_CONFIG_HOME = Join-Path $HOME '.config\yazi'
 # 사내 인증서 저장소를 Bun/GJC의 TLS 검증에 사용한다.
 $env:BUN_OPTIONS = '--use_system_ca'
 
-# GlazeWM이 저장소 안의 설정 파일을 사용하도록 현재 셸과 사용자 환경
-# 변수를 자동으로 동기화한다. 사용자 환경 변수는 로그인 후 시작되는
-# GUI/자동시작 프로세스에도 전달된다.
+# GlazeWM이 저장소 안의 설정 파일을 사용하도록 현재 셸에만 경로를 넣는다.
+# 사용자 환경 변수 등록은 setup.ps1이 담당한다. 여기서 쓰면 셸을 열 때마다
+# WM_SETTINGCHANGE 브로드캐스트가 발생해 모든 창의 응답을 기다리게 된다.
 $dotfilesRoot = Split-Path -Parent $PSScriptRoot
-$windowManagerConfigPaths = @{
-    GLAZEWM_CONFIG_PATH = Join-Path $dotfilesRoot 'glazewm\config.yaml'
-}
-
-foreach ($entry in $windowManagerConfigPaths.GetEnumerator()) {
-    Set-Item -Path "Env:$($entry.Key)" -Value $entry.Value
-
-    if ([Environment]::GetEnvironmentVariable($entry.Key, 'User') -ne $entry.Value) {
-        [Environment]::SetEnvironmentVariable($entry.Key, $entry.Value, 'User')
-    }
-}
+$env:GLAZEWM_CONFIG_PATH = Join-Path $dotfilesRoot 'glazewm\config.yaml'
 
 # CLI 도구들이 외부 편집기를 요청할 때 Neovim을 사용한다.
 $env:EDITOR = 'nvim'

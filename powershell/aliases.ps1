@@ -1,11 +1,12 @@
 # Powershell 용 alias를 등록하는 스크립트
 
-Remove-Item alias:cd -ErrorAction SilentlyContinue
-Remove-Item alias:ls -ErrorAction SilentlyContinue
-
 # zoxide를 기본 cd로 변경
-function global:cd {
-    z @args
+if (Get-Command zoxide -CommandType Application -ErrorAction SilentlyContinue) {
+    Remove-Item alias:cd -ErrorAction SilentlyContinue
+
+    function global:cd {
+        z @args
+    }
 }
 
 function global:.. {
@@ -21,18 +22,21 @@ function global:.... {
 }
 
 # Windows Terminal 안에서도 leaf의 터미널 편집기를 현재 화면에서 실행한다.
-$script:LeafCommand = (Get-Command leaf -CommandType ExternalScript,Application | Select-Object -First 1).Source
-function global:leaf {
-    $wtSession = $env:WT_SESSION
+$script:LeafCommand = (Get-Command leaf -CommandType ExternalScript, Application -ErrorAction SilentlyContinue |
+    Select-Object -First 1).Source
+if ($script:LeafCommand) {
+    function global:leaf {
+        $wtSession = $env:WT_SESSION
 
-    try {
-        Remove-Item Env:WT_SESSION -ErrorAction SilentlyContinue
-        & $script:LeafCommand @args
-    } finally {
-        if ($null -eq $wtSession) {
+        try {
             Remove-Item Env:WT_SESSION -ErrorAction SilentlyContinue
-        } else {
-            $env:WT_SESSION = $wtSession
+            & $script:LeafCommand @args
+        } finally {
+            if ($null -eq $wtSession) {
+                Remove-Item Env:WT_SESSION -ErrorAction SilentlyContinue
+            } else {
+                $env:WT_SESSION = $wtSession
+            }
         }
     }
 }
@@ -68,8 +72,12 @@ function global:y {
 }
 
 # eza로 ls 대체
-function global:ls {
-    eza --icons=always @args
+if (Get-Command eza -CommandType Application -ErrorAction SilentlyContinue) {
+    Remove-Item alias:ls -ErrorAction SilentlyContinue
+
+    function global:ls {
+        eza --icons=always @args
+    }
 }
 
 function global:ll {
@@ -90,12 +98,6 @@ function global:lt2 {
 
 function global:lt3 {
     eza -aT -L3 --color=always --group-directories-first --icons @args
-}
-
-# codex는 기본적으로 inline 모드로 실행하고, 추가 옵션은 그대로 전달
-$script:CodexCommand = (Get-Command codex -CommandType ExternalScript,Application | Select-Object -First 1).Source
-function global:codex {
-    & $script:CodexCommand --no-alt-screen @args
 }
 
 function global:lg {
