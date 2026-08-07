@@ -367,12 +367,22 @@ if (Confirm-Step -Title 'Create managed config links' -Details $linkDetails) {
 }
 
 $glazeConfig = Join-Path $repoRoot 'glazewm\config.yaml'
+$userEnvironment = [ordered] @{
+    GLAZEWM_CONFIG_PATH = $glazeConfig
+    BUN_OPTIONS         = '--use-system-ca'
+}
+
 if (Confirm-Step -Title 'Configure user environment' -Details @(
-    "Set GLAZEWM_CONFIG_PATH to $glazeConfig for this shell and future sessions."
+    "Set GLAZEWM_CONFIG_PATH to $glazeConfig.",
+    "Set BUN_OPTIONS to --use-system-ca so Bun and GJC trust the system certificate store.",
+    'Both are registered for the current shell and for processes started outside a PowerShell session.'
 )) {
     Write-Section 'Configuring environment'
-    [Environment]::SetEnvironmentVariable('GLAZEWM_CONFIG_PATH', $glazeConfig, 'User')
-    $env:GLAZEWM_CONFIG_PATH = $glazeConfig
+    foreach ($entry in $userEnvironment.GetEnumerator()) {
+        [Environment]::SetEnvironmentVariable($entry.Key, $entry.Value, 'User')
+        Set-Item -Path "Env:$($entry.Key)" -Value $entry.Value
+        Write-Host "Set $($entry.Key) = $($entry.Value)"
+    }
 }
 
 if (-not $SkipWindowManager) {
