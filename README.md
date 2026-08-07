@@ -77,3 +77,12 @@ Reload GlazeWM after editing its configuration:
 ```powershell
 glazewm command wm-reload-config
 ```
+
+Codex keeps its own config outside this repository. Run it inline instead of on the alternate screen with `~/.codex/config.toml`:
+
+```toml
+[tui]
+alternate_screen = "never"   # auto | always | never
+```
+
+Inline mode preserves scrollback but redraws far more, so leave it at `auto` on machines where the terminal stutters.

@@ -17,7 +17,7 @@ $env:STARSHIP_CONFIG = Join-Path $HOME '.config\starship\starship.toml'
 $env:YAZI_CONFIG_HOME = Join-Path $HOME '.config\yazi'
 
 # 사내 인증서 저장소를 Bun/GJC의 TLS 검증에 사용한다.
-$env:BUN_OPTIONS = '--use_system_ca'
+$env:BUN_OPTIONS = '--use-system-ca'
 
 # GlazeWM이 저장소 안의 설정 파일을 사용하도록 현재 셸에만 경로를 넣는다.
 # 사용자 환경 변수 등록은 setup.ps1이 담당한다. 여기서 쓰면 셸을 열 때마다
