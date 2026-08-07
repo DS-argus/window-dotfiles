@@ -4,11 +4,6 @@ rev = "bb758e2"
 hash = "1e3b6c8b03dae81c3672ec9e9700b666"
 
 [[flavor.deps]]
-use = "BennyOe/tokyo-night"
-rev = "8e6296f"
-hash = "49258e379077f4b0d2e62dfdb131c7d"
-
-[[flavor.deps]]
 use = "AdithyanA2005/nord"
 rev = "34970be"
 hash = "735d66ffc27487ca57a9dd7e1373aad9"
