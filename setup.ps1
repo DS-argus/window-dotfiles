@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
     [switch] $SkipPackages,
+    [switch] $SkipUpdates,
     [switch] $SkipWindowManager,
     [switch] $Yes
 )
@@ -202,23 +203,63 @@ function Install-ScoopPackages {
         'JetBrainsMono-NF', 'D2Coding-NF', 'glazewm', 'zebar'
     )
 
+    $installedPackages = @()
+    try {
+        $installedPackages = @(scoop list 6> $null | ForEach-Object Name)
+    } catch {
+        Write-Warning "Could not read the installed Scoop packages: $($_.Exception.Message)"
+    }
+
+    if (-not $SkipUpdates) {
+        Write-Host 'Updating Scoop and its buckets...'
+        $global:LASTEXITCODE = 0
+        scoop update
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warning "Scoop update failed with exit code $LASTEXITCODE."
+        }
+    }
+
     $failedPackages = [System.Collections.Generic.List[string]]::new()
     foreach ($package in $packages) {
-        Write-Host "Installing Scoop package: $package"
+        $isInstalled = $package -in $installedPackages
+        if ($isInstalled -and $SkipUpdates) {
+            Write-Host "Scoop package already installed: $package"
+            continue
+        }
+
+        if ($isInstalled) {
+            Write-Host "Updating Scoop package: $package"
+        } else {
+            Write-Host "Installing Scoop package: $package"
+        }
+
         try {
             $global:LASTEXITCODE = 0
-            scoop install $package
+            if ($isInstalled) {
+                scoop update $package
+            } else {
+                scoop install $package
+            }
             if ($LASTEXITCODE -ne 0) {
                 throw "Scoop exited with code $LASTEXITCODE."
             }
         } catch {
             $failedPackages.Add($package)
             Write-Warning "Skipped '$package': $($_.Exception.Message)"
+            if ($isInstalled) {
+                $global:LASTEXITCODE = 0
+                scoop reset $package
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Warning "Could not restore '$package' after the failed update."
+                }
+            }
         }
     }
 
     if (Get-Command leaf -ErrorAction SilentlyContinue) {
         Write-Host 'Leaf is already installed.'
+    } elseif (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
+        Write-Warning 'npm was not found; skipped Leaf installation.'
     } else {
         npm install --global '@rivolink/leaf'
         if ($LASTEXITCODE -ne 0) {
@@ -252,8 +293,10 @@ if (-not $SkipPackages) {
         'Install Scoop when it is missing.',
         'Reuse an existing Git installation, or install Git with Scoop when missing.',
         'Install the configured CLI tools, fonts, GlazeWM, and Zebar when missing.',
+        'Update Scoop, its buckets, and every listed package that is already installed.',
         'Install Leaf globally with npm when it is missing.',
-        'A failed package is reported and skipped; remaining packages continue.'
+        'A failed package is reported and skipped; remaining packages continue.',
+        'Pass -SkipUpdates to keep installed packages at their current version.'
     )
     if (Confirm-Step -Title 'Install packages' -Details $packageDetails) {
         try {

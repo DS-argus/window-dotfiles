@@ -42,7 +42,7 @@ The backup is preserved. Restore any other files you still need after installati
 
 - Installs Scoop when missing
 - Reuses Git from PATH, Scoop, or a Git for Windows installation
-- Installs the required Scoop packages and Leaf
+- Installs or updates the required Scoop packages and installs Leaf when missing
 - Connects the PowerShell, Git, Windows Terminal, Neovim, Yazi, and Leaf configs
 - Configures GlazeWM and Zebar
 - Registers `GLAZEWM_CONFIG_PATH`
@@ -56,6 +56,7 @@ Optional flags:
 
 ```powershell
 & "$HOME\.config\setup.ps1" -SkipPackages
+& "$HOME\.config\setup.ps1" -SkipUpdates        # keep installed packages at their current version
 & "$HOME\.config\setup.ps1" -SkipWindowManager
 & "$HOME\.config\setup.ps1" -Yes                # approve every stage
 ```
