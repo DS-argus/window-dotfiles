@@ -63,10 +63,11 @@ Optional flags:
 
 ## After installation
 
-Set the local Git identity and authenticate GitHub CLI:
+Set the Git identity and authenticate GitHub CLI. The identity is written to `git/.gitconfig`, which stays out of version control:
 
 ```powershell
-nvim "$HOME\.config\git\.gitconfig"
+git config --global user.name "Your Name"
+git config --global user.email "you@example.com"
 gh auth login
 ```
 
