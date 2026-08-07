@@ -45,7 +45,7 @@ The backup is preserved. Restore any other files you still need after installati
 - Installs or updates the required Scoop packages and installs Leaf when missing
 - Connects the PowerShell, Git, Windows Terminal, Neovim, Yazi, and Leaf configs
 - Configures GlazeWM and Zebar
-- Registers `GLAZEWM_CONFIG_PATH`
+- Registers `GLAZEWM_CONFIG_PATH` and `BUN_OPTIONS` in the user environment
 - Adds GlazeWM to Windows startup and starts it when it is not running
 - Installs Yazi packages
 - Backs up conflicting managed paths as `.backup.<timestamp>`
