@@ -286,6 +286,34 @@ function Set-WindowManagerStartup {
     Write-Host "Configured startup: $shortcutPath"
 }
 
+function Start-WindowManager {
+    if (Get-Process glazewm -ErrorAction SilentlyContinue) {
+        Write-Host 'GlazeWM is already running.'
+        return
+    }
+
+    $configPath = Join-Path $repoRoot 'glazewm\config.yaml'
+    $glazeWm = (Get-Command glazewm -ErrorAction Stop).Source
+    Start-Process -FilePath $glazeWm -ArgumentList @('start', '--config', $configPath) -WindowStyle Hidden
+
+    $deadline = (Get-Date).AddSeconds(20)
+    while ((Get-Date) -lt $deadline) {
+        Start-Sleep -Milliseconds 500
+        try {
+            $global:LASTEXITCODE = 0
+            glazewm query monitors *> $null
+        } catch {
+            $global:LASTEXITCODE = 1
+        }
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host 'Started GlazeWM.'
+            return
+        }
+    }
+
+    Write-Warning 'GlazeWM did not answer its IPC within 20 seconds; start it manually.'
+}
+
 $localGitConfig = Join-Path $repoRoot 'git\.gitconfig'
 
 if (-not $SkipPackages) {
@@ -351,12 +379,13 @@ if (-not $SkipWindowManager) {
     $startupPath = Join-Path ([Environment]::GetFolderPath('Startup')) 'GlazeWM.lnk'
     if (Confirm-Step -Title 'Configure GlazeWM startup' -Details @(
         "Create or update $startupPath.",
-        "Start GlazeWM with $glazeConfig at the next sign-in."
+        "Start GlazeWM with $glazeConfig now and at every sign-in."
     )) {
         if (-not (Get-Command glazewm -ErrorAction SilentlyContinue)) {
             Write-Warning 'GlazeWM is not installed; skipped startup registration.'
         } else {
             Set-WindowManagerStartup
+            Start-WindowManager
         }
     }
 }
@@ -377,5 +406,5 @@ Write-Section 'Setup complete'
 Write-Host 'Restart PowerShell to load the profile.'
 Write-Host "Edit Git identity in: $localGitConfig"
 if (-not $SkipWindowManager) {
-    Write-Host 'GlazeWM starts automatically only when the startup step was approved.'
+    Write-Host 'GlazeWM runs now and starts automatically at the next sign-in.'
 }

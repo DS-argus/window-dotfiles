@@ -46,7 +46,7 @@ The backup is preserved. Restore any other files you still need after installati
 - Connects the PowerShell, Git, Windows Terminal, Neovim, Yazi, and Leaf configs
 - Configures GlazeWM and Zebar
 - Registers `GLAZEWM_CONFIG_PATH`
-- Adds GlazeWM to Windows startup
+- Adds GlazeWM to Windows startup and starts it when it is not running
 - Installs Yazi packages
 - Backs up conflicting managed paths as `.backup.<timestamp>`
 
@@ -70,7 +70,7 @@ nvim "$HOME\.config\git\.gitconfig"
 gh auth login
 ```
 
-Open a new PowerShell session to load the profile. GlazeWM and Zebar start automatically at the next sign-in.
+Open a new PowerShell session to load the profile. Setup starts GlazeWM and Zebar right away, and they start again at every sign-in.
 
 Reload GlazeWM after editing its configuration:
 
