@@ -1,0 +1,9 @@
+# Copy this file to vfs.toml, then replace every placeholder with your own
+# remote host and SSH key path. Do not commit vfs.toml.
+
+[services.remote-laptop]
+type     = "sftp"
+host     = "100.x.x.x"
+user     = "remote-user"
+port     = 22
+key_file = "~/.ssh/id_ed25519_remote"
