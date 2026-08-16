@@ -80,7 +80,7 @@ vim.g.loaded_python3_provider = 0
 |---------|------|
 | `snacks.nvim` | 대시보드, picker, 입력 UI, 분할 확대 |
 | `lualine.nvim` | 상태 표시줄 |
-| `tokyonight.nvim` | 컬러스킴 |
+| `nord.nvim` | 컬러스킴 |
 
 ### 편집 지원
 

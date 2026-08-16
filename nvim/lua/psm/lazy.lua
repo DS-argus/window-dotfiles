@@ -21,7 +21,7 @@ require("lazy").setup({
 }, {
   -- 첫 설치 시 색 테마가 비어 보이지 않도록 기본 테마를 미리 지정한다.
   install = {
-    colorscheme = { "tokyonight" },
+    colorscheme = { "nord" },
   },
   checker = {
     enabled = false,
