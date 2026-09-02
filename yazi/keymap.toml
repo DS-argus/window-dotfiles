@@ -66,6 +66,7 @@ keymap = [
 	{ on = "y",         run = "yank",                        desc = "Yank selected files (copy)" },
 	{ on = "x",         run = "yank --cut",                  desc = "Yank selected files (cut)" },
 	{ on = "p",         run = "paste",                       desc = "Paste yanked files" },
+	{ on = [ "g", "i" ], run = '''shell -- powershell.exe -NoProfile -STA -Command "Add-Type -AssemblyName System.Windows.Forms; Add-Type -AssemblyName System.Drawing; $img = [System.Windows.Forms.Clipboard]::GetImage(); if ($null -eq $img) { Write-Error 'Clipboard has no image'; exit 1 }; $name = 'pasted_' + (Get-Date -Format 'yyyyMMdd_HHmmss_fff') + '.png'; $path = Join-Path (Get-Location) $name; $img.Save($path, [System.Drawing.Imaging.ImageFormat]::Png); $img.Dispose()"''', desc = "Paste clipboard image as PNG", for = "windows" },
 	{ on = "P",         run = "paste --force",               desc = "Paste yanked files (overwrite if the destination exists)" },
 	{ on = "-",         run = "link",                        desc = "Symlink the absolute path of yanked files" },
 	{ on = "_",         run = "link --relative",             desc = "Symlink the relative path of yanked files" },
