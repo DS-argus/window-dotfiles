@@ -14,9 +14,7 @@ linemode       = "size_and_mtime"
 show_hidden    = true
 show_symlink   = true
 scrolloff      = 5
-# Let psmux own mouse handling. This avoids forwarding VT mouse sequences into
-# Yazi after a remote/Cloud PC focus transition.
-mouse_events   = []
+mouse_events   = [ "click", "scroll", "drag" ]
 title_format   = "Yazi: {cwd}"
 
 [preview]

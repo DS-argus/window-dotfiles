@@ -10,7 +10,7 @@ require("session"):setup({
 -- Keep the badge fixed in the top-right header so long paths do not move it.
 Header:children_add(function()
 	local cwd = cx.active.current.cwd
-	if cwd.domain == "mac" then
+	if cwd.spec.domain == "mac" then
 		return ui.Line {
 			ui.Span("   MAC "):fg("#ffffff"):bg("#dc2626"):bold(),
 			ui.Span(" SFTP "):fg("#fecaca"):bg("#7f1d1d"):bold(),
