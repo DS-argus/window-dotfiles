@@ -1,6 +1,7 @@
 local M = {}
 
 M.names = {
+	"gopls",
 	"pyright",
 	"lua_ls",
 }

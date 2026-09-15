@@ -54,6 +54,30 @@ return {
       local function map(mode, lhs, rhs, desc)
         vim.keymap.set(mode, lhs, rhs, { buffer = bufnr, desc = desc })
       end
+      local function close_git_diff()
+        local revision_wins = {}
+        local source_win
+
+        for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+          local name = vim.api.nvim_buf_get_name(vim.api.nvim_win_get_buf(win))
+          if name:match("^gitsigns://") then
+            table.insert(revision_wins, win)
+          elseif vim.wo[win].diff then
+            source_win = win
+          end
+        end
+
+        vim.cmd("diffoff!")
+
+        if source_win and vim.api.nvim_win_is_valid(source_win) then
+          vim.api.nvim_set_current_win(source_win)
+        end
+        for _, win in ipairs(revision_wins) do
+          if vim.api.nvim_win_is_valid(win) then
+            vim.api.nvim_win_close(win, false)
+          end
+        end
+      end
 
       -- 변경 블록 이동
       map("n", "]c", function()
@@ -91,6 +115,7 @@ return {
       map("n", "<leader>hD", function()
         gitsigns.diffthis("~")
       end, "이전 커밋과 diff")
+      map("n", "<leader>hX", close_git_diff, "Git diff 종료 및 비교창 닫기")
       map("n", "<leader>hQ", function()
         gitsigns.setqflist("all")
       end, "저장소 변경 Quickfix")
