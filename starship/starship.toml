@@ -12,9 +12,9 @@ truncation_symbol = '…/'
 truncate_to_repo = false
 
 [character]
-success_symbol = '[ ](bold fg:aurora_green)'
-error_symbol = '[✘ ](bold fg:aurora_red)'
-vimcmd_symbol = '[: ](bold fg:aurora_yellow)'
+success_symbol = '[](bold fg:aurora_green)'
+error_symbol = '[✘](bold fg:aurora_red)'
+vimcmd_symbol = '[:](bold fg:aurora_yellow)'
 
 [custom.giturl]
 description = 'Display symbol for remote Git server'
