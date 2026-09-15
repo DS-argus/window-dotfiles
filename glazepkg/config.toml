@@ -1,0 +1,9 @@
+[appearance]
+  theme = "nord"
+
+[install]
+
+[search]
+  bottom_up = false
+
+[managers]
