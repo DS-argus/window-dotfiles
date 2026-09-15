@@ -33,10 +33,10 @@ ueberzug_offset = [ 0, 0, 0, 0 ]
 [opener]
 edit = [
 	{ run = '${EDITOR:-vi} %s', desc = "$EDITOR", block = true, for = "unix" },
-	{ run = 'nvim %*', block = true, desc = "nvim", for = "windows" },
+	{ run = 'nvim %s', block = true, desc = "nvim", for = "windows" },
 ]
 leaf = [
-	{ run = 'set "WT_SESSION=" && leaf %*', block = true, desc = "leaf", for = "windows" },
+	{ run = 'set "WT_SESSION=" && leaf %s', block = true, desc = "leaf", for = "windows" },
 ]
 open = [
 	{ run = 'xdg-open %s1',                 desc = "Open", for = "linux" },
@@ -44,7 +44,7 @@ open = [
 	{ run = 'start "" %s1', orphan = true,  desc = "Open", for = "windows" },
 ]
 browser = [
-	{ run = '"C:\Program Files\Google\Chrome\Application\chrome.exe" %*', orphan = true, desc = "browser", for = "windows" },
+	{ run = '"C:\Program Files\Google\Chrome\Application\chrome.exe" %s', orphan = true, desc = "browser", for = "windows" },
 ]
 reveal = [
 	{ run = 'xdg-open %d1',                        desc = "Reveal", for = "linux" },
@@ -58,18 +58,18 @@ zip = [
 ]
 extract = [
 	{ run = 'ya pub extract --list %s',  desc = "Extract here", for = "unix" },
-	{ run = 'ya pub extract --list %*',   desc = "Extract here", for = "windows" },
+	{ run = 'ya pub extract --list %s',   desc = "Extract here", for = "windows" },
 ]
 play = [
 	{ run = 'mpv --force-window %s', orphan = true, for = "unix" },
-	{ run = 'mpv --force-window %*', orphan = true, for = "windows" },
+	{ run = 'mpv --force-window %s', orphan = true, for = "windows" },
 	{ run = '''mediainfo %s1; echo "Press enter to exit"; read _''', block = true, desc = "Show media info", for = "unix" },
 ]
 csv = [
-	{ run = 'csvlens %*', block = true, desc = "csvlens", for = "windows" },
+	{ run = 'csvlens %s', block = true, desc = "csvlens", for = "windows" },
 ]
 excel = [
-	{ run = '"C:\Program Files\Microsoft Office\Root\Office16\EXCEL.EXE" %*', orphan = true, desc = "Excel", for = "windows" },
+	{ run = '"C:\Program Files\Microsoft Office\Root\Office16\EXCEL.EXE" %s', orphan = true, desc = "Excel", for = "windows" },
 ]
 
 [open]
