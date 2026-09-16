@@ -30,6 +30,17 @@ $env:EDITOR = 'nvim'
 $env:VISUAL = 'nvim'
 $env:GIT_EDITOR = 'nvim'
 
+# PSReadLine의 입력 이력 기반 자동 제안을 명시적으로 켠다.
+# psmux 같은 중간 터미널에서는 호스트의 기본 감지가 제안을 끌 수 있다.
+if ($Host.Name -eq 'ConsoleHost') {
+    try {
+        Import-Module PSReadLine
+        Set-PSReadLineOption -PredictionSource History -PredictionViewStyle InlineView
+    } catch {
+        Write-Verbose 'PSReadLine history prediction is unavailable in this host.'
+    }
+}
+
 if ($env:TERM -ne 'dumb') {
     try {
         Invoke-Expression (&starship init powershell)
